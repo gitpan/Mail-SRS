@@ -20,6 +20,17 @@ Mail::SRS::Guarded - A guarded Sender Rewriting Scheme (recommended)
 
 =head1 DESCRIPTION
 
+This is the default subclass of Mail::SRS. An instance of this subclass
+is actually constructed when "new Mail::SRS" is called.
+
+Note that allowing variable separators after the SRS\d token means that
+we must preserve this separator in the address for a possible reversal.
+SRS1 does not need to understand the SRS0 address, just preserve it,
+on the assumption that it is valid and that the host doing the final
+reversal will perform cryptographic tests. It may therefore strip just
+the string SRS0 and not the separator. This explains the appearance
+of a double separator in SRS1<sep><hostname>=<sep>.
+
 See Mail::SRS for details of the standard SRS subclass interface.
 This module provides the methods compile() and parse(). It operates
 without store, and guards against gaming the shortcut system.
@@ -43,7 +54,7 @@ sub compile {
 		return $SRS1TAG . $self->separator .
 						join($SRSSEP, $srshost, $srsuser);
 	}
-	elsif ($senduser =~ s/$SRS0RE//io) {
+	elsif ($senduser =~ s/$SRS0RE/$1/io) {
 		# Implementors please note, the last one was m//, this is s///
 		return $SRS1TAG . $self->separator .
 						join($SRSSEP, $sendhost, $senduser);
@@ -60,7 +71,7 @@ sub parse {
 		unless (defined $srshost and defined $srsuser) {
 			die "Invalid wrapped SRS address";
 		}
-		return ($srshost, $SRS0TAG . $self->separator . $srsuser);
+		return ($srshost, $SRS0TAG . $srsuser);
 	}
 
 	return $self->SUPER::parse($user);

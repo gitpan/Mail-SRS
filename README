@@ -75,6 +75,9 @@ METHODS
         process all SRS mails by creating users SRS0 and SRS1, and using
         Mail::SRS in the default delivery rule for these users.
 
+        Some notes on the use and preservation of these separators are found
+        in the perldoc for Mail::SRS::Guarded.
+
     Some subclasses require other parameters. See their documentation for
     details.
 

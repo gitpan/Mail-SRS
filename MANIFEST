@@ -10,6 +10,7 @@ eg/simple.pl
 lib/Mail/SRS.pm
 lib/Mail/SRS/DB.pm
 lib/Mail/SRS/Guarded.pm
+lib/Mail/SRS/Reversable.pm
 lib/Mail/SRS/Reversible.pm
 lib/Mail/SRS/Shortcut.pm
 t/01_basic.t
@@ -18,5 +19,6 @@ t/03_reversible.t
 t/04_dbm.t
 t/05_shortcut.t
 t/06_separator.t
+t/07_varysep.t
 t/10_pod.t
 t/11_pod_coverage.t

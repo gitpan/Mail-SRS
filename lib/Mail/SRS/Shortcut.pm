@@ -47,6 +47,7 @@ sub compile {
 		# presence of malicious agents.
 	}
 	elsif ($senduser =~ s/$SRS1RE//io) {
+		# This should never be hit in practice. It would be bad.
 		# Introduce compatibility with the guarded format?
 		# SRSHOST, hash, timestamp, host, user
 		(undef, undef, undef, $sendhost, $senduser) =

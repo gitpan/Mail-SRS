@@ -11,13 +11,13 @@ use Exporter;
 use Carp;
 use Digest::HMAC_SHA1;
 
-$VERSION = "0.20";
+$VERSION = "0.21";
 @ISA = qw(Exporter);
 
 $SRS0TAG = "SRS0";
 $SRS1TAG = "SRS1";
-$SRS0RE = qr/^$SRS0TAG[-+=]/io;
-$SRS1RE = qr/^$SRS1TAG[-+=]/io;
+$SRS0RE = qr/^$SRS0TAG([-+=])/io;
+$SRS1RE = qr/^$SRS1TAG([-+=])/io;
 $SRSSEP = "=";
 
 $SRSTAG = $SRS0TAG;
@@ -119,6 +119,9 @@ ignored for the purpose of identifying a local recipient. If the
 initial separator is set to + or -, then an administrator may process
 all SRS mails by creating users SRS0 and SRS1, and using Mail::SRS
 in the default delivery rule for these users.
+
+Some notes on the use and preservation of these separators are found
+in the perldoc for L<Mail::SRS::Guarded>.
 
 =back
 
