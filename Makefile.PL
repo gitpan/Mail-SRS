@@ -6,6 +6,7 @@ my @programs = ();
 for (split "\n", <<'QUERIES') {
 srs|y|SRS command line interface
 srsd|y|SRS address translation daemon
+srsc|y|SRS daemon commandline client
 QUERIES
 	my ($program, $default, $description) = split /\|/, $_;
 	if (prompt("Do you want to install '$program', the $description?", 

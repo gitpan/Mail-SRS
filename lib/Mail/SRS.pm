@@ -13,7 +13,7 @@ use Exporter;
 use Carp;
 use Digest::HMAC_SHA1;
 
-$VERSION = "0.30";
+$VERSION = "0.31";
 @ISA = qw(Exporter);
 
 $SRS0TAG = "SRS0";
@@ -214,7 +214,7 @@ sub forward {
 	}
 	my $aliashost = $alias;
 
-	if ($aliashost eq $sendhost) {
+	if (lc $aliashost eq lc $sendhost) {
 		return "$senduser\@$sendhost" unless $self->{AlwaysRewrite};
 	}
 
@@ -523,6 +523,36 @@ The default hash length for the SRS HMAC.
 The default expiry time for timestamps.
 
 =back
+
+=head1 EXAMPLES OF USAGE
+
+For people wanting boilerplate and those less familiar with using
+Perl modules in larger applications.
+
+=head2 Forward Rewriting
+
+	my $srs = new Mail::SRS(...);
+	my $address = ...
+	my $domain = ...
+	my $srsaddress = eval { $srs->forward($srsaddress, $domain); };
+	if ($@) {
+		# The rewrite failed
+	}
+	else {
+		# The rewrite succeeded
+	}
+
+=head2 Reverse Rewriting
+
+	my $srs = new Mail::SRS(...);
+	my $srsaddress = ...
+	my $address = eval { $srs->reverse($srsaddress); };
+	if ($@) {
+		# The rewrite failed
+	}
+	else {
+		# The rewrite succeeded
+	}
 
 =head1 NOTES ON SRS
 

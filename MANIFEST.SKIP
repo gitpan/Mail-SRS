@@ -3,6 +3,7 @@ Makefile$
 Makefile\.[a-z]+$
 ^pm_to_blib$
 CVS/.*
+.svn/
 ,v$
 ^tmp/
 \.old$
