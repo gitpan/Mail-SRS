@@ -13,6 +13,7 @@ lib/Mail/SRS/Guarded.pm
 lib/Mail/SRS/Reversable.pm
 lib/Mail/SRS/Reversible.pm
 lib/Mail/SRS/Shortcut.pm
+srs
 t/01_basic.t
 t/02_guarded.t
 t/03_reversible.t
@@ -22,3 +23,4 @@ t/06_separator.t
 t/07_varysep.t
 t/10_pod.t
 t/11_pod_coverage.t
+t/20_cmdline.t

@@ -114,6 +114,13 @@ METHODS
     Return a two character timestamp representing 'today', or $time if
     given. $time is a Unix timestamp (seconds since the aeon).
 
+    This Perl function has been designed to be agnostic as to base, and in
+    practice, base32 is used since it can be reversed even if a remote MTA
+    smashes case (in violation of RFC2821 section 2.4). The agnosticism
+    means that the Perl uses division instead of rightshift, but in Perl
+    that doesn't matter. C implementors should implement this operation as a
+    right shift by 5.
+
   $srs->timestamp_check($timestamp)
     Return 1 if a timestamp is valid, undef otherwise. There are 4096
     possible timestamps, used in a cycle. At any time, $srs->{MaxAge}
@@ -193,19 +200,20 @@ EXTENDING Mail::SRS
     data from the standard subclasses, I will provide them. Callback hooks
     have not been provided in this release candidate.
 
-WARNING: MINOR CHANGES since v0.21
+CHANGELOG
+  MINOR CHANGES since v0.21
     Dates are now encoded in base32.
     Case insensitive MAC validation is now allowed, but will issue a
     warning.
 
-WARNING: MINOR CHANGES since v0.18
+  MINOR CHANGES since v0.18
     $SRSTAG and $SRSWRAP are deprecated.
     Mail::SRS::Reversable is now Mail::SRS::Reversible
         This should not be a problem since people should not be using it!
 
     You must use $SRS0RE and $SRS1RE to detect SRS addresses.
 
-WARNING: MAJOR CHANGES since v0.15
+  MAJOR CHANGES since v0.15
     The separator character is now "=".
     The cryptographic scheme is now HMAC with SHA1.
     Only a prefix of the MAC is used.

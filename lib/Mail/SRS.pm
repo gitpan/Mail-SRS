@@ -11,7 +11,7 @@ use Exporter;
 use Carp;
 use Digest::HMAC_SHA1;
 
-$VERSION = "0.22";
+$VERSION = "0.23";
 @ISA = qw(Exporter);
 
 $SRS0TAG = "SRS0";
@@ -242,6 +242,13 @@ sub parse {
 Return a two character timestamp representing 'today', or $time if
 given. $time is a Unix timestamp (seconds since the aeon).
 
+This Perl function has been designed to be agnostic as to base,
+and in practice, base32 is used since it can be reversed even if a
+remote MTA smashes case (in violation of RFC2821 section 2.4). The
+agnosticism means that the Perl uses division instead of rightshift,
+but in Perl that doesn't matter. C implementors should implement this
+operation as a right shift by 5.
+
 =cut
 
 # We have two options. We can either encode an send date or an expiry
@@ -467,7 +474,9 @@ Write a subclass. If people mail me asking for callbacks with the
 hash data from the standard subclasses, I will provide them. Callback
 hooks have not been provided in this release candidate.
 
-=head1 WARNING: MINOR CHANGES since v0.21
+=head1 CHANGELOG
+
+=head2 MINOR CHANGES since v0.21
 
 =over 4
 
@@ -478,7 +487,7 @@ a warning.
 
 =back
 
-=head1 WARNING: MINOR CHANGES since v0.18
+=head2 MINOR CHANGES since v0.18
 
 =over 4
 
@@ -492,7 +501,7 @@ This should not be a problem since people should not be using it!
 
 You must use $SRS0RE and $SRS1RE to detect SRS addresses.
 
-=head1 WARNING: MAJOR CHANGES since v0.15
+=head2 MAJOR CHANGES since v0.15
 
 =over 4
 

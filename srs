@@ -1,0 +1,79 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use Getopt::Long;
+use Mail::SRS qw(:all);
+
+my ($secretfile, $secret, $alias, $forward, $reverse, $help);
+my $separator = $SRSSEP;
+my $hashlength = 4;
+my @addresses;
+my $result = GetOptions (
+				"separator=s"	=> \$separator,
+				"address=s"		=> \@addresses,
+				"secret=s"		=> \$secret,
+				"secretfile=s"	=> \$secretfile,
+				"forward"		=> \$forward,
+				"reverse"		=> \$reverse,
+				"alias=s"		=> \$alias,
+				"hashlength=i"	=> \$hashlength,
+				"help"			=> \$help,
+					);
+if (!$result || $help) {
+	print << "EOH";
+Usage: srs [flags] [address ...]
+   --separator=s      Specify the initial separator to be - + or =
+   --address=s        Specify an address to transform
+   --secret=s         Specify the SRS cryptographic secret
+   --secretfile=s     Specify a file from which to read the secret
+   --forward          Perform forward transformation
+   --reverse          Perform reverse transformation
+   --hashlength=i     Specify number of characters to use in the hash
+   --help             Display this help
+       =s denotes a string argument. =i denotes an integer argument
+EOH
+	exit(1);
+}
+
+die "Separator character must be a single + - or =, not $separator"
+				unless $separator =~ /^[=+-]$/;
+die "Hash length _should_ be nonzero"
+				unless $hashlength;
+
+push(@addresses, @ARGV);
+die "No address given!"
+				unless @addresses;
+
+unless (defined $secret) {
+	die "No secret or secretfile given. Use --secret or --secretfile"
+					unless $secretfile;
+	die "Secret file $secretfile not readable" unless -r $secretfile;
+	local *FH;
+	open(FH, "<$secretfile") or die "Cannot open $secretfile: $!";
+	while (<FH>) {
+		next unless /\S/;
+		next if /^#/;
+		$secret = $_;
+		last;
+	}
+	close(FH);
+	die "Unable to read any secret from $secretfile"
+					unless defined $secret;
+}
+
+my $srs = new Mail::SRS(
+				Secret		=> $secret,
+				Separator	=> $separator,
+				HashLength	=> $hashlength,
+					);
+my $newaddress;
+if ($reverse) {
+	print $srs->reverse($_), "\n" for @addresses;
+}
+else {
+	die "I need an alias address or domain to do forwards transform. " .
+					"Use --alias"
+					unless defined $alias;
+	print $srs->forward($_, $alias), "\n" for @addresses;
+}

@@ -14,9 +14,11 @@ WriteMakefile(
 				'Fcntl'				=> 0,
 				'Carp'				=> 0,
 				'Exporter'			=> 0,
+				'Getopt::Long'		=> 2.30,
 			}, # e.g., Module::Name => 1.1
 	ABSTRACT_FROM => 'lib/Mail/SRS.pm', # retrieve abstract from module
 	AUTHOR     => 'Shevek <cpan@anarres.org>',
+	EXE_FILES	=> [ qw(srs) ],
 	clean		=> { FILES => 'test.db' },
 );
 
