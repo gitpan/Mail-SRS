@@ -198,3 +198,12 @@ as SRS, the new return path is NOT an SRS address, and therefore does
 NOT start with "SRS+". This is so that database rewriting schemes and
 `true' SRS schemes can operate seamlessly on the `same' internet.
 EOM
+
+presskey;
+
+print << "EOM";
+Now go and read the web page at http://www.anarres.org/projects/srs/
+
+If your questions are not answered there, then please mail the
+maintainers.
+EOM

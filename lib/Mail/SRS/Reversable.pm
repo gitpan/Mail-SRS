@@ -41,7 +41,7 @@ sub compile {
 	# Note that there are 4 fields here and that sendhost may
 	# not contain a + sign. Therefore, we do not need to escape
 	# + signs anywhere in order to reverse this transformation.
-	return join($self->separator,
+	return join($SRSSEP,
 					$SRSTAG, $hash, $timestamp, $sendhost, $senduser);
 }
 

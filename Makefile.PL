@@ -6,7 +6,7 @@ WriteMakefile(
     'NAME'		=> 'Mail::SRS',
     'VERSION_FROM'	=> 'lib/Mail/SRS.pm', # finds $VERSION
     'PREREQ_PM'		=> {
-				'Digest::HMAC'		=> 1.01,
+				'Digest::HMAC_SHA1'	=> 1.01,
 				'Test::More'		=> 0.40,
 				'MLDBM'				=> 2.01,
 				'Storable'			=> 2.04,

@@ -1,0 +1,5 @@
+Consider using the year as a salt in the hash secret.
+
+Find out about case sensitivity in various MTAs.
+
+Find out about the 64 character limit in various MTAs.

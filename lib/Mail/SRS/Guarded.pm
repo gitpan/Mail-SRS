@@ -11,7 +11,7 @@ use Mail::SRS::Shortcut;
 
 =head1 NAME
 
-Mail::SRS::Guarded - A shortcutting Sender Rewriting Scheme
+Mail::SRS::Guarded - A guarded Sender Rewriting Scheme (recommended)
 
 =head1 SYNOPSIS
 
@@ -43,12 +43,12 @@ sub compile {
 		# an SRS address, unlikely though that is. We are in the presence
 		# of malicious agents. We can check more rigorously than this...
 		if (defined $srshost and defined $srsuser) {
-			return join($self->separator,
+			return join($SRSSEP,
 							$SRSWRAP, $srshost, $srsuser);
 		}
 	}
-	elsif ($senduser =~ m/^\Q$SRSTAG$SRSSEP\E/io) {
-		return join($self->separator,
+	elsif ($senduser =~ s/^\Q$SRSTAG$SRSSEP\E//io) {
+		return join($SRSSEP,
 						$SRSWRAP, $sendhost, $senduser);
 	}
 
@@ -64,7 +64,7 @@ sub parse {
 		unless (defined $srshost and defined $srsuser) {
 			die "Invalid wrapped SRS address";
 		}
-		return ($srshost, $srsuser);
+		return ($srshost, "$SRSTAG$SRSSEP$srsuser");
 	}
 
 	return $self->SUPER::parse($user);

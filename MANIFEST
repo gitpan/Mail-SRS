@@ -4,6 +4,7 @@ Makefile.PL
 OLD-DOCS
 README
 README.pobox
+TODO
 eg/Limit.pm
 eg/simple.pl
 lib/Mail/SRS.pm
