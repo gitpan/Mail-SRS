@@ -4,7 +4,7 @@ use blib;
 
 use Test::More tests => 13;
 
-use_ok('Mail::SRS::Reversable');
+BEGIN { use_ok('Mail::SRS::Reversable'); }
 my $srs = new Mail::SRS::Reversable(
 				Secret	=> "foo",
 					);

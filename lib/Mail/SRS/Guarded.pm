@@ -48,6 +48,7 @@ sub compile {
 		}
 	}
 	elsif ($senduser =~ s/^\Q$SRSTAG$SRSSEP\E//io) {
+		# Implementors please note, the last one was m//, this is s///
 		return join($SRSSEP,
 						$SRSWRAP, $sendhost, $senduser);
 	}

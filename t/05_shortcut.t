@@ -4,7 +4,7 @@ use blib;
 
 use Test::More tests => 17;
 
-use_ok('Mail::SRS::Shortcut');
+BEGIN { use_ok('Mail::SRS::Shortcut'); }
 
 my $srs = new Mail::SRS::Shortcut(
 				Secret	=> "foo",

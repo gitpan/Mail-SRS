@@ -2,9 +2,9 @@ use strict;
 use warnings;
 use blib;
 
-use Test::More tests => 23;
+use Test::More tests => 24;
 
-use_ok('Mail::SRS');
+BEGIN { use_ok('Mail::SRS'); }
 
 my $srs = new Mail::SRS(
 				Secret	=> "foo",
@@ -30,6 +30,7 @@ my $srs1 = $srs->forward( $srs0, $alias[1]);
 # print STDERR "Composed is $srs1\n";
 ok(length $srs1, 'Made another new address with the SRS address');
 like($srs1, qr/^SRS1/, 'It is an SRS1 address');
+unlike($srs1, qr/SRS0/, 'It is not an SRS0 address');
 my $old1 = $srs->reverse($srs1);
 ok(length $old1, 'Reversed the address again');
 like($old1, qr/^SRS0/, 'It is the original SRS0 address');

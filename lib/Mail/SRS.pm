@@ -8,7 +8,7 @@ use Exporter;
 use Carp;
 use Digest::HMAC_SHA1;
 
-$VERSION = "0.16";
+$VERSION = "0.17";
 @ISA = qw(Exporter);
 
 $SRSTAG = "SRS0";
@@ -62,11 +62,15 @@ To run this from the build directory, type "make teach".
 
 =head1 WARNING: MAJOR CHANGES since v0.15
 
-=item The separator character is now =.
+=over 4
+
+=item The separator character is now C<=>.
 
 =item The cryptographic scheme is now HMAC with SHA1.
 
 =item Only a prefix of the MAC is used.
+
+=back
 
 This API is still a release candidate and should remain relatively
 stable.
@@ -77,7 +81,7 @@ Write a subclass. If people mail me asking for callbacks with the
 hash data from the standard subclasses, I will provide them. Callback
 hooks have not been provided in this release candidate.
 
-=item $srs = new Mail::SRS(...)
+=head2 $srs = new Mail::SRS(...)
 
 Construct a new Mail::SRS object and return it. Available parameters
 are:
@@ -138,7 +142,7 @@ sub new {
 
 =head1 METHODS
 
-=item $srsaddress = $srs->forward($sender, $alias)
+=head2 $srsaddress = $srs->forward($sender, $alias)
 
 Map a sender address into a new sender and a cryptographic cookie.
 Returns an SRS address to use as the new sender.
@@ -169,7 +173,7 @@ sub forward {
 	return "$srsdata\@$aliashost";
 }
 
-=item $sender = $srs->reverse($srsaddress)
+=head2 $sender = $srs->reverse($srsaddress)
 
 Reverse the mapping to get back the original address. Validates
 all cryptographic and timestamp information. Returns the original
@@ -193,7 +197,7 @@ sub reverse {
 	return "$senduser\@$sendhost";
 }
 
-=item $srs->compile($sendhost, $senduser)
+=head2 $srs->compile($sendhost, $senduser)
 
 This method, designed to be overridden by subclasses, takes as
 parameters the original host and user and must compile a new username
@@ -209,7 +213,7 @@ sub compile {
 					"All subclasses override it";
 }
 
-=item $srs->parse($srsuser)
+=head2 $srs->parse($srsuser)
 
 This method, designed to be overridden by subclasses, takes an
 SRS-transformed username as an argument, and must reverse the
@@ -224,7 +228,7 @@ sub parse {
 					"All subclasses override it";
 }
 
-=item $srs->timestamp_create([$time])
+=head2 $srs->timestamp_create([$time])
 
 Return a two character timestamp representing 'today', or $time if
 given. $time is a Unix timestamp (seconds since the aeon).
@@ -254,7 +258,7 @@ sub timestamp_create {
 	return $BASE64[$time & 63] . $out;
 }
 
-=item $srs->timestamp_check($timestamp)
+=head2 $srs->timestamp_check($timestamp)
 
 Return 1 if a timestamp is valid, undef otherwise. There are 4096
 possible timestamps, used in a cycle. At any time, $srs->{MaxAge}
@@ -280,7 +284,7 @@ sub timestamp_check {
 	return undef;
 }
 
-=item $srs->time_check($time)
+=head2 $srs->time_check($time)
 
 Similar to $srs->timestamp_check($timestamp), but takes a Unix time, and
 checks that an alias created at that Unix time is still valid. This is
@@ -294,7 +298,7 @@ sub time_check {
 	return undef;
 }
 
-=item $srs->hash_create(@data)
+=head2 $srs->hash_create(@data)
 
 Returns a cryptographic hash of all data in @data. Any piece of data
 encoded into an address which must remain inviolate should be hashed,
@@ -319,7 +323,7 @@ sub hash_create {
 	return substr($hash, 0, $self->{HashLength});
 }
 
-=item $srs->hash_verify($hash, @data)
+=head2 $srs->hash_verify($hash, @data)
 
 Verify that @data has not been tampered with, given the cryptographic
 hash previously output by $srs->hash_create(); Returns 1 or undef.
@@ -344,7 +348,7 @@ sub hash_verify {
 	return undef;
 }
 
-=item $srs->set_secret($new, @old)
+=head2 $srs->set_secret($new, @old)
 
 Add a new secret to the rewriter. When an address is returned, all
 secrets are tried to see if the hash can be validated. Don't use "foo".
@@ -356,7 +360,7 @@ sub set_secret {
 	$self->{Secret} = [ @_ ];
 }
 
-=item $srs->get_secret()
+=head2 $srs->get_secret()
 
 Return the list of secrets. These are secret. Don't publish them.
 
@@ -369,6 +373,8 @@ sub get_secret {
 =head1 EXPORTS
 
 Given :all, this module exports three variables.
+
+=over 4
 
 =item $SRSSEP
 
@@ -407,13 +413,15 @@ The SRS0 tag.
 
 The SRS1 tag.
 
+=back
+
 =head1 BUGS
 
 Email address parsing for quoted addresses is not yet done properly.
 
 =head1 SEE ALSO
 
-Mail::SRS::Guarded, Mail::SRS::DB, Mail::SRS::Reversable,
+L<Mail::SRS::Guarded>, L<Mail::SRS::DB>, L<Mail::SRS::Reversable>,
 "make teach", eg/*, http://www.anarres.org/projects/srs/
 
 =head1 AUTHOR
