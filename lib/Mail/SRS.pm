@@ -2,13 +2,23 @@ package Mail::SRS;
 
 use strict;
 use warnings;
-use vars qw($VERSION $SRSTAG);
+use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS
+				$SRSTAG $SRSWRAP $SRSSEP);
+use Exporter;
 use Carp;
 use Digest::HMAC_MD5;
 
-$VERSION = "0.13";
+$VERSION = "0.14";
+@ISA = qw(Exporter);
 
 $SRSTAG = "SRS0";
+$SRSWRAP = "SRS1";
+$SRSSEP = "+";
+
+@EXPORT_OK = qw($SRSTAG $SRSWRAP $SRSSEP);
+%EXPORT_TAGS = (
+		all	=> \@EXPORT_OK,
+			);
 
 =head1 NAME
 
@@ -95,6 +105,12 @@ details.
 
 sub new {
 	my $class = shift;
+
+	if ($class eq 'Mail::SRS') {
+		require Mail::SRS::Guarded;
+		return new Mail::SRS::Guarded(@_);
+	}
+
 	my $self = ($#_ == 0) ? { %{ (shift) } } : { @_ };
 	$self->{Secret} = [ $self->{Secret} ]
 					unless ref($self->{Secret}) eq 'ARRAY';
@@ -121,7 +137,8 @@ addresses. See the interactive walkthrough for more information on this
 sub forward {
 	my ($self, $sender, $alias) = @_;
 
-	$sender =~ m/^(.*)\@([^\@]+)$/ or die 'Sender contains no @';
+	$sender =~ m/^(.*)\@([^\@]+)$/
+					or die "Sender '$sender' contains no @";
 	my ($senduser, $sendhost) = ($1, $2);
 	$senduser =~ m/\@/ and die 'Sender username may not contain an @';
 
@@ -172,6 +189,11 @@ $self->timestamp_create().
 =cut
 
 sub compile {
+	croak "How did Mail::SRS::compile get called? " .
+					"All subclasses override it";
+}
+
+sub old_compile {
 	my ($self, $sendhost, $senduser) = @_;
 
 	if ($senduser =~ m/^\Q$SRSTAG$self->{Separator}\E/io) {
@@ -213,6 +235,11 @@ hash and timestamp in the parsed data, using $self->hash_verify($hash,
 =cut
 
 sub parse {
+	croak "How did Mail::SRS::parse get called? " .
+					"All subclasses override it";
+}
+
+sub old_parse {
 	my ($self, $user) = @_;
 
 	unless ($user =~ m/^\Q$SRSTAG$self->{Separator}\E/oi) {
@@ -387,6 +414,10 @@ sub get_secret {
 sub separator {
 	return $_[0]->{Separator};
 }
+
+=head1 BUGS
+
+Email address parsing for quoted addresses is not yet done properly.
 
 =head1 SEE ALSO
 

@@ -142,6 +142,9 @@ METHODS
     $srs->get_secret()
     Return the list of secrets. These are secret. Don't publish them.
 
+BUGS
+    Email address parsing for quoted addresses is not yet done properly.
+
 SEE ALSO
     Mail::SRS::DB, Mail::SRS::Reversable, "make teach", eg/*
 

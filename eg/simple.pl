@@ -9,7 +9,7 @@ my $srs = new Mail::SRS(
 # to c@target.com.
 
 my $source = "a\@source.com";
-my $alias = "b\@forwarder.com";
+my $alias = "b\@forward.com";
 my $target = "c\@target.com";
 my $final = "d\@final.com";
 
@@ -71,33 +71,66 @@ EOM
 
 presskey;
 
+my $srs1source = $srs->forward($newsource, $target);
+
 print << "EOM";
 If $target is in fact a forwarder, sending to $final,
-then $target must rewrite the sender again. However, bounces
-need only go to $source, not to $alias. So $target rewrites
-the address to:
-EOM
+then $target must rewrite the sender again. Bounces must be
+cryptographically checked before they are sent to a real person,
+therefore the first SRS link in the chain is maintained, and the
+address becomes
+	$srs1source
 
-my $newnewsource = $srs->forward($newsource, $target);
-
-print << "EOM";
-	$newnewsource
-
-Exactly the same points apply, and this time the cryptographic
-hash is generated with $alias\'s secret.
+This new sender does not contain any new cryptographic information. It
+contains only the original cryptographic hash from $alias
+and it assumes that $alias will check its own hash before
+returning the mail to $source.
 EOM
 
 presskey;
 
+my $srs0source = $srs->reverse($srs1source);
+my $reverse = $srs->reverse($srs0source);
+
 print << "EOM";
 Now, when either $final or $target performs the reverse
-transformation, it will get the address for bounces:
+transformation, it will get the original SRS address for bounces:
+	$srs0source
+
+And then the first forwarder in the chain may perform a final reversal,
+checking the cryptographic information before returning the mail to
+	$reverse
+
+For more information on the peculiarities of this `second layer', see
+the web page at http://www.anarres.org/projects/srs/
 EOM
 
-my $newoldsource = $srs->reverse($newnewsource);
+presskey;
+
+use Mail::SRS::Shortcut;
+$srs = new Mail::SRS::Shortcut(
+				Secret	=> "foo",
+					);
+my $srs0a = $srs->forward($source, $alias);
+my $srs0b = $srs->forward($srs0a, $target);
+my $orig = $srs->reverse($srs0b);
 
 print << "EOM";
-	$newoldsource
+This code provides for three other possible types of transformation.
+The first is a simplistic SRS scheme which implements only a part of
+the SRS scheme. It shortcuts even the first forwarder after the
+source address, so the rewriting sequence would proceed as follows:
+
+	$source
+via a forwarder becomes
+	$srs0a
+which if forwarded again, becomes simply
+	$srs0b
+which when reversed, returns to
+	$orig
+
+WARNING: IF YOU USE THIS SIMPLE SYSTEM, YOU MAY BECOME AN OPEN RELAY
+
 EOM
 
 presskey;
@@ -109,8 +142,7 @@ $srs = new Mail::SRS::Reversable(
 my $revsource = $srs->forward($newsource, $final);
 
 print << "EOM";
-This code provides for two other possible types of transformation.
-The first is the fully reversable transformation, and is provided by a
+The second is the fully reversable transformation, and is provided by a
 subclass of Mail::SRS called Mail::SRS::Reversable. This subclass
 rewrites
 	$newsource
@@ -140,7 +172,10 @@ $srs = undef;	# garb!
 unlink($srsdb);
 
 print << "EOM";
-The other mechanism provided by this code is a database driven system.
+The last mechanism provided by this code is a database driven system.
+This is designed to be useful to people requiring more functionality
+from a custom sender rewriting scheme.
+
 In this case, the address
 	$source
 is rewritten to

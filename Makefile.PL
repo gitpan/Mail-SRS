@@ -11,6 +11,7 @@ WriteMakefile(
 				'MLDBM'				=> 2.01,
 				'Storable'			=> 2.04,
 				'DB_File'			=> 1.806,
+				'Mail::Address'		=> 1.60,
 			}, # e.g., Module::Name => 1.1
 	ABSTRACT_FROM => 'lib/Mail/SRS.pm', # retrieve abstract from module
 	AUTHOR     => 'Shevek <cpan@anarres.org>',

@@ -2,10 +2,13 @@ package Mail::SRS::DB;
 
 use strict;
 use warnings;
-use base 'Mail::SRS';
+use vars qw(@ISA);
 use Carp;
 use MLDBM qw(DB_File Storable);
 use Fcntl;
+use Mail::SRS qw(:all);
+
+@ISA = qw(Mail::SRS);
 
 =head1 NAME
 
