@@ -9,11 +9,14 @@ eg/Limit.pm
 eg/simple.pl
 lib/Mail/SRS.pm
 lib/Mail/SRS/DB.pm
+lib/Mail/SRS/Daemon.pm
 lib/Mail/SRS/Guarded.pm
 lib/Mail/SRS/Reversable.pm
 lib/Mail/SRS/Reversible.pm
 lib/Mail/SRS/Shortcut.pm
 srs
+srsc
+srsd
 t/01_basic.t
 t/02_guarded.t
 t/03_reversible.t
@@ -24,3 +27,4 @@ t/07_varysep.t
 t/10_pod.t
 t/11_pod_coverage.t
 t/20_cmdline.t
+t/21_daemon.t

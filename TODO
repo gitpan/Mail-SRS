@@ -10,3 +10,5 @@ Clean up s/// and m// tests in Guarded.pm and Shortcut.pm
 	- modify strings at sensible times.
 
 Update documentation.
+
+Twat check to make sure that secret isn't a hashref or something.

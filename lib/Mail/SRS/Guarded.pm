@@ -45,15 +45,23 @@ sub compile {
 	my ($self, $sendhost, $senduser) = @_;
 
 	if ($senduser =~ s/$SRS1RE//io) {
-		my ($srshost, $srsuser) = split(qr/\Q$SRSSEP\E/, $senduser, 2);
+
 		# We could do a sanity check. After all, it might NOT be
 		# an SRS address, unlikely though that is. We are in the
 		# presence of malicious agents. However, since we don't need
 		# to interpret it, it doesn't matter if it isn't an SRS
 		# address. Our malicious SRS0 party gets back the garbage
 		# he spat out.
+
+		# Actually, it turns out that we can simplify this
+		# function considerably, although it should be borne in mind
+		# that this address is not opaque to us, even though we didn't
+		# actually process or generate it.
+
+		# my ($srshost, $srsuser) = split(qr/\Q$SRSSEP\E/, $senduser,2);
 		return $SRS1TAG . $self->separator .
-						join($SRSSEP, $srshost, $srsuser);
+						# join($SRSSEP, $srshost, $srsuser);
+						$senduser;
 	}
 	elsif ($senduser =~ s/$SRS0RE/$1/io) {
 		return $SRS1TAG . $self->separator .

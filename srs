@@ -149,6 +149,8 @@ must not also be given.
 
 =head2 --reverse
 
+No argument.
+
 Specifies a reverse transformation. --forward must not also be given.
 
 =head2 --alias

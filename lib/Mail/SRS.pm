@@ -6,12 +6,14 @@ use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS
 				$SRS0TAG $SRS1TAG
 				$SRS0RE $SRS1RE
 				$SRSSEP
-				$SRSTAG $SRSWRAP);
+				$SRSTAG $SRSWRAP
+				$SRSHASHLENGTH $SRSMAXAGE
+				);
 use Exporter;
 use Carp;
 use Digest::HMAC_SHA1;
 
-$VERSION = "0.26";
+$VERSION = "0.27";
 @ISA = qw(Exporter);
 
 $SRS0TAG = "SRS0";
@@ -20,13 +22,19 @@ $SRS0RE = qr/^$SRS0TAG([-+=])/io;
 $SRS1RE = qr/^$SRS1TAG([-+=])/io;
 $SRSSEP = "=";
 
+# These are deprecated.
 $SRSTAG = $SRS0TAG;
 $SRSWRAP = $SRS1TAG;
+
+$SRSHASHLENGTH = 4;
+$SRSMAXAGE = 21;
 
 @EXPORT_OK = qw($SRS0TAG $SRS1TAG
 				$SRS0RE $SRS1RE
 				$SRSSEP
-				$SRSTAG $SRSWRAP);
+				$SRSTAG $SRSWRAP
+				$SRSHASHLENGTH $SRSMAXAGE
+				);
 %EXPORT_TAGS = (
 		all	=> \@EXPORT_OK,
 			);
@@ -151,12 +159,13 @@ sub new {
 	my $self = ($#_ == 0) ? { %{ (shift) } } : { @_ };
 	$self->{Secret} = [ $self->{Secret} ]
 					unless ref($self->{Secret}) eq 'ARRAY';
-	$self->{MaxAge} = 31 unless $self->{MaxAge};
-	$self->{HashLength} = 4 unless $self->{HashLength};
+	$self->{MaxAge} = $SRSMAXAGE unless $self->{MaxAge};
+	$self->{HashLength} = $SRSHASHLENGTH unless $self->{HashLength};
 	$self->{HashMin} = $self->{HashLength} unless $self->{HashMin};
 	$self->{Separator} = '=' unless exists $self->{Separator};
 	unless ($self->{Separator} =~ m/^[-+=]$/) {
-		die "Initial separator must be = - or +";
+		die "Initial separator must be = - or +, " .
+						"not $self->{Separator}";
 	}
 	return bless $self, $class;
 }
@@ -177,7 +186,7 @@ sub forward {
 	my ($self, $sender, $alias) = @_;
 
 	$sender =~ m/^(.*)\@([^\@]+)$/
-					or die "Sender '$sender' contains no @";
+					or die "Sender '$sender' contains no \@";
 	my ($senduser, $sendhost) = ($1, $2);
 	$senduser =~ m/\@/ and die 'Sender username may not contain an @';
 
@@ -194,9 +203,9 @@ sub forward {
 
 =head2 $sender = $srs->reverse($srsaddress)
 
-Reverse the mapping to get back the original address. Validates
-all cryptographic and timestamp information. Returns the original
-sender address.
+Reverse the mapping to get back the original address. Validates all
+cryptographic and timestamp information. Returns the original sender
+address. This method will die if the address cannot be reversed.
 
 =cut
 
@@ -207,11 +216,7 @@ sub reverse {
 	my ($user, $host) = ($1, $2);
 
 	my ($sendhost, $senduser) = eval { $self->parse($user); };
-
-	if ($@) {
-		warn "Parse returned error in `$user': $@";
-		return undef;
-	}
+	die "Parse error in `$user': $@" if $@;
 
 	return "$senduser\@$sendhost";
 }
@@ -484,6 +489,14 @@ Deprecated, equal to $SRS0TAG.
 
 Deprecated, equal to $SRS1TAG.
 
+=item $SRSHASHLENGTH
+
+The default hash length for the SRS HMAC.
+
+=item $SRSMAXAGE
+
+The default expiry time for timestamps.
+
 =back
 
 =head1 NOTES ON SRS
@@ -598,6 +611,14 @@ want to override hash_create(), hash_verify(), timestamp_create()
 or timestamp_check().
 
 =head1 CHANGELOG
+
+=head2 MINOR CHANGES since v0.26
+
+=over 4
+
+=item parse() and compile() are explicitly specified to die() on error.
+
+=back
 
 =head2 MINOR CHANGES since v0.23
 

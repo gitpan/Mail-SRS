@@ -102,7 +102,7 @@ METHODS
   $sender = $srs->reverse($srsaddress)
     Reverse the mapping to get back the original address. Validates all
     cryptographic and timestamp information. Returns the original sender
-    address.
+    address. This method will die if the address cannot be reversed.
 
   $srs->compile($sendhost, $senduser)
     This method, designed to be overridden by subclasses, takes as
@@ -205,6 +205,12 @@ EXPORTS
     $SRSWRAP
         Deprecated, equal to $SRS1TAG.
 
+    $SRSHASHLENGTH
+        The default hash length for the SRS HMAC.
+
+    $SRSMAXAGE
+        The default expiry time for timestamps.
+
 NOTES ON SRS
   Case Sensitivity
     RFC2821 states in section 2.4: "The local-part of a mailbox MUST BE
@@ -306,6 +312,9 @@ NOTES ON SRS
     timestamp_check().
 
 CHANGELOG
+  MINOR CHANGES since v0.26
+    parse() and compile() are explicitly specified to die() on error.
+
   MINOR CHANGES since v0.23
     Update BASE32 according to RFC3548.
 

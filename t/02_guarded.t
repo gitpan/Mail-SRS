@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use blib;
 
-use Test::More tests => 24;
+use Test::More tests => 25;
 
 BEGIN { use_ok('Mail::SRS'); }
 
@@ -36,6 +36,9 @@ ok(length $old1, 'Reversed the address again');
 like($old1, qr/^SRS0/, 'It is the original SRS0 address');
 my $orig = $srs->reverse($old1);
 is($orig, $source, 'Got back the original sender');
+
+eval { $srs->reverse("garbage"); };
+ok(defined $@, 'Error detected reversing garbage');
 
 my @tests = qw(
 	user@domain-with-dash.com
