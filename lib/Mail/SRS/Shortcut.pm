@@ -37,14 +37,17 @@ sub compile {
 	my ($self, $sendhost, $senduser) = @_;
 
 	if ($senduser =~ s/^$SRS0RE//io) {
-		# We just do the split because this was hashed with someone else's
-		# secret key and we can't check it.
+		# This duplicates effort in Guarded.pm but makes this file work
+		# standalone.
+		# We just do the split because this was hashed with someone
+		# else's secret key and we can't check it.
 		# hash, timestamp, host, user
 		(undef, undef, $sendhost, $senduser) =
 						split(qr/\Q$SRSSEP\E/, $senduser, 4);
 		# We should do a sanity check. After all, it might NOT be
 		# an SRS address, unlikely though that is. We are in the
-		# presence of malicious agents.
+		# presence of malicious agents. However, this code is
+		# never reached if the Guarded subclass is used.
 	}
 	elsif ($senduser =~ s/$SRS1RE//io) {
 		# This should never be hit in practice. It would be bad.
@@ -56,13 +59,12 @@ sub compile {
 
 	my $timestamp = $self->timestamp_create();
 
-	# This has to be done in compile, because we might need access
-	# to it for storing in a database.
 	my $hash = $self->hash_create($timestamp, $sendhost, $senduser);
 
 	# Note that there are 5 fields here and that sendhost may
-	# not contain a + sign. Therefore, we do not need to escape
-	# + signs anywhere in order to reverse this transformation.
+	# not contain a valid separator. Therefore, we do not need to
+	# escape separators anywhere in order to reverse this
+	# transformation.
 	return $SRS0TAG . $self->separator .
 			join($SRSSEP, $hash, $timestamp, $sendhost, $senduser);
 }
@@ -75,7 +77,7 @@ sub parse {
 	}
 
 	# The 4 here matches the number of fields we encoded above. If
-	# there are more + signs, then they belong in senduser anyway.
+	# there are more separators, then they belong in senduser anyway.
 	my ($hash, $timestamp, $sendhost, $senduser) =
 					split(qr/\Q$SRSSEP\E/, $user, 4);
 	# Again, this must match as above.

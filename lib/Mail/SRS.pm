@@ -11,7 +11,7 @@ use Exporter;
 use Carp;
 use Digest::HMAC_SHA1;
 
-$VERSION = "0.23";
+$VERSION = "0.24";
 @ISA = qw(Exporter);
 
 $SRS0TAG = "SRS0";
@@ -53,9 +53,9 @@ The Sender Rewriting Scheme preserves .forward functionality in an
 SPF-compliant world.
 
 SPF requires the SMTP client IP to match the envelope sender
-(return-path).  When a message is forwarded through an intermediate
+(return-path). When a message is forwarded through an intermediate
 server, that intermediate server may need to rewrite the return-path
-to remain SPF compliant.  If the message bounces, that intermediate
+to remain SPF compliant. If the message bounces, that intermediate
 server needs to validate the bounce and forward the bounce to the
 original sender.
 
@@ -68,8 +68,9 @@ SRS is documented at http://spf.pobox.com/srs.html and many points
 about the scheme are discussed at http://www.anarres.org/projects/srs/
 
 For a better understanding of this code and how it functions, please
-run the interactive walkthrough in eg/simple.pl in this distribution.
-To run this from the build directory, type "make teach".
+read this document and run the interactive walkthrough in eg/simple.pl
+in this distribution. To run this from the build directory, type
+"make teach".
 
 =head1 METHODS
 
@@ -258,7 +259,7 @@ operation as a right shift by 5.
 # have to store them.
 
 my @BASE64 = ('A'..'Z', 'a'..'z', '0'..'9', '+', '/');
-my @BASE32 = ('0'..'9', 'A'..'V');
+my @BASE32 = ('A'..'Z', '2'..'7');
 
 my @BASE = @BASE32;
 my %BASE = map { $BASE[$_] => $_ } (0..$#BASE);
@@ -266,15 +267,15 @@ my %BASE = map { $BASE[$_] => $_ } (0..$#BASE);
 # i.e. is the size a power of 2?
 die "Invalid base array of size " . scalar(@BASE)
 				if scalar(@BASE) & (scalar(@BASE) - 1);
-my $TICKSLOTS = scalar(@BASE) * scalar(@BASE);	# Two chars
 my $PRECISION = 60 * 60 * 24;	# One day
+my $TICKSLOTS = scalar(@BASE) * scalar(@BASE);	# Two chars
 
 sub timestamp_create {
 	my ($self, $time) = @_;
 	$time = time() unless defined $time;
-	# Since we only mask in the bottom few bits anyway, the
-	# % $TICKSLOTS isn't needed.
-	$time = int($time / $PRECISION) % $TICKSLOTS;
+	# Since we only mask in the bottom few bits anyway, we
+	# don't need to take this modulo anything (e.g. @BASE^2).
+	$time = int($time / $PRECISION); #% $TICKSLOTS;
 	# print "Time is $time\n";
 	my $out = $BASE[$time & $#BASE];	# $#BASE is 2^n -1
 	$time = int($time / scalar(@BASE));	# Use right shift.
@@ -361,20 +362,26 @@ sub hash_verify {
 	my @secret = $self->get_secret;
 	croak "Cannot verify a cryptographic MAC without a secret"
 					unless @secret;
-	my %valid = ();
+	my @valid = ();
 	foreach my $secret (@secret) {
 		my $hmac = new Digest::HMAC_SHA1($secret);
 		foreach (@args) {
 			$hmac->add($_);
 		}
 		my $valid = substr($hmac->b64digest, 0, length($hash));
+		# We test all case sensitive matches before case insensitive
+		# matches. While the risk of a case insensitive collision is
+		# quite low, we might as well be careful.
 		return 1 if $valid eq $hash;
-		$valid{lc($valid)} = 1;
+		push(@valid, $valid);	# Lowercase it later.
 	}
-	if ($valid{lc($hash)}) {
-		warn "SRS: Case insensitive hash match detected. " .
-			"Someone smashed case in the local-part.";
-		return 1;
+	$hash = lc($hash);
+	foreach (@valid) {
+		if ($hash eq lc($_)) {
+			warn "SRS: Case insensitive hash match detected. " .
+				"Someone smashed case in the local-part.";
+			return 1;
+		}
 	}
 	return undef;
 }
@@ -468,13 +475,126 @@ Deprecated, equal to $SRS1TAG.
 
 =back
 
-=head1 EXTENDING Mail::SRS
+=head1 NOTES ON SRS
 
-Write a subclass. If people mail me asking for callbacks with the
-hash data from the standard subclasses, I will provide them. Callback
-hooks have not been provided in this release candidate.
+=head2 Case Sensitivity
+
+RFC2821 states in section 2.4: "The local-part of a mailbox MUST BE
+treated as case sensitive. Therefore, SMTP implementations MUST take
+care to preserve the case of mailbox local-parts. [...]  In particular,
+for some hosts the user "smith" is different from the user "Smith".
+However, exploiting the case sensitivity of mailbox local-parts
+impedes interoperability and is discouraged."
+
+SRS does not rely on case sensitivity in the local part. It uses
+base64 for encoding the hash, but allows a case insensitive match,
+making this approximately equivalent to base36 at worst. It will
+issue a warning if it detects that a remote MTA has smashed case. The
+timestamp is encoded in base32.
+
+=head2 The 64 Billion Character Question
+
+RFC2821 section 4.5.3.1: Size limits and minimums:
+
+	There are several objects that have required minimum/maximum
+	sizes.	Every implementation MUST be able to receive objects
+	of at least these sizes. Objects larger than these sizes
+	SHOULD be avoided when possible. However, some Internet
+	mail constructs such as encoded X.400 addresses [16] will
+	often require larger objects: clients MAY attempt to transmit
+	these, but MUST be prepared for a server to reject them if
+	they cannot be handled by it. To the maximum extent possible,
+	implementation techniques which impose no limits on the length
+	of these objects should be used.
+
+	local-part
+		The maximum total length of a user name or other
+		local-part is 64 characters.
+
+Clearly, by including 2 domain names and a local-part in the rewritten
+address, there is no way in which SRS can guarantee to stay under
+this limit. However, very few systems are known to actively enforce
+this limit, and those which become known to the developers will be
+listed here.
+
+=over 4
+
+=item Cisco: PIX MailGuard (firewall gimmick)
+
+=item WebShield [something] (firewall gimmick)
+
+=back
+
+=head2 Invalid SRS Addresses
+
+DO NOT MALFORMAT ADDRESSES. This is designed to be an interoperable
+format. Certain things are allowed, such as changing the semantics
+of the hash or the timestamp. However, both of these fields must
+be present and separated by the SRS separator character C<=>. The
+purpose of this section is to illustrate that if a malicious party
+were to malformat an address, he would gain nothing by doing so,
+nor would the network suffer.
+
+The SRS protocol is predicated on the fact that the first forwarder
+provides a cryptographic wrapper on the forward chain for sending
+mail to the original sender. So what happens if an SRS address is
+invalid, or faked by a spammer? 
+
+The minimum parsing of existing SRS addresses is done at each hop. If
+an SRS0 address is not valid or badly formatted, it will not affect
+the operation of the system: the mail will go out along the forwarder
+chain, and return to the invalid or badly formatted address.
+
+If the spammer is not pretending to be the first hop, then he
+must somehow construct an SRS0 address to embed within his SRS1
+address. The cryptographic checks on this SRS0 address will fail at
+the first forwarder and the mail will be dropped.
+
+If the spammer is pretending to be the first hop, then SPF should
+require that any bounces coming back return to his mail server,
+thus he wins nothing.
+
+=head2 Cryptographic Systems
+
+The hash in the address is designed to prevent the forging of reverse
+addresses by a spammer, who might then use the SRS host as a forwarder.
+It may only be constructed or validated by a party who knows the
+secret key.
+
+The cryptographic system in the default implementation is not mandated.
+Since nobody else ever needs to interpret the hash, it is reasonable
+to put any binary data into this field (subject to the possible
+constraint of case insensitive encoding).
+
+The SRS maintainers have attempted to provide a good system. It
+satisfies a simple set of basic requirements: to provide unforgeability
+of SRS addresses given that every MTA for a domain shares a secret key.
+We prefer SHA1 over MD5 for political, rather than practical reasons.
+(Anyone disputing this statement must include an example of a practical
+weakness in their mail. We would love to see it.)
+
+If you find a weakness in our system, or you think you know of a
+better system, please tell us. If your requirements are different,
+you may override hash_create() and hash_verify() to implement a
+different system without adversely impacting the network, as long as
+your addresses still behave as SRS addresses.
+
+=head2 Extending Mail::SRS
+
+Write a subclass. You will probably want to override compile() and
+parse(). If you are more familiar with the internals of SRS, you might
+want to override hash_create(), hash_verify(), timestamp_create()
+or timestamp_check().
 
 =head1 CHANGELOG
+
+=head2 MINOR CHANGES since v0.23
+
+=over 4
+
+=item Update BASE32 according to RFC3548.
+
+=back
 
 =head2 MINOR CHANGES since v0.21
 
@@ -520,9 +640,11 @@ stable.
 
 Email address parsing for quoted addresses is not yet done properly.
 
-More error checking should be done for invalid SRS addresses.
-
 Case insensitive MAC validation should become an option.
+
+=head1 TODO
+
+Write a testsuite for testing user-defined SRS implementations.
 
 =head1 SEE ALSO
 

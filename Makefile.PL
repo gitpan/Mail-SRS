@@ -1,7 +1,18 @@
 use 5.006;
 use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
+
+# Thanks to YAML
+my @programs = ();
+for (split "\n", <<'QUERIES') {
+srs|y|SRS command line interface
+QUERIES
+	my ($program, $default, $description) = split /\|/, $_;
+	if (prompt("Do you want to install '$program', the $description?", 
+			   $default) =~ /^y/) {
+		push(@programs, $program);
+	}
+}
+
 WriteMakefile(
     'NAME'		=> 'Mail::SRS',
     'VERSION_FROM'	=> 'lib/Mail/SRS.pm', # finds $VERSION
@@ -18,7 +29,7 @@ WriteMakefile(
 			}, # e.g., Module::Name => 1.1
 	ABSTRACT_FROM => 'lib/Mail/SRS.pm', # retrieve abstract from module
 	AUTHOR     => 'Shevek <cpan@anarres.org>',
-	EXE_FILES	=> [ qw(srs) ],
+	EXE_FILES	=> \@programs,
 	clean		=> { FILES => 'test.db' },
 );
 

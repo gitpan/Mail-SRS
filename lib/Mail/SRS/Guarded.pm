@@ -45,17 +45,17 @@ sub compile {
 	my ($self, $sendhost, $senduser) = @_;
 
 	if ($senduser =~ s/$SRS1RE//io) {
-		# We just do the split because this was hashed with someone else's
-		# secret key and we can't check it.
 		my ($srshost, $srsuser) = split(qr/\Q$SRSSEP\E/, $senduser, 2);
-		# We should do a sanity check. After all, it might NOT be
+		# We could do a sanity check. After all, it might NOT be
 		# an SRS address, unlikely though that is. We are in the
-		# presence of malicious agents.
+		# presence of malicious agents. However, since we don't need
+		# to interpret it, it doesn't matter if it isn't an SRS
+		# address. Our malicious SRS0 party gets back the garbage
+		# he spat out.
 		return $SRS1TAG . $self->separator .
 						join($SRSSEP, $srshost, $srsuser);
 	}
 	elsif ($senduser =~ s/$SRS0RE/$1/io) {
-		# Implementors please note, the last one was m//, this is s///
 		return $SRS1TAG . $self->separator .
 						join($SRSSEP, $sendhost, $senduser);
 	}
