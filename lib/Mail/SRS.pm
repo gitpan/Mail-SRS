@@ -8,7 +8,7 @@ use Exporter;
 use Carp;
 use Digest::HMAC_SHA1;
 
-$VERSION = "0.17";
+$VERSION = "0.18";
 @ISA = qw(Exporter);
 
 $SRSTAG = "SRS0";
@@ -60,26 +60,7 @@ For a better understanding of this code and how it functions, please
 run the interactive walkthrough in eg/simple.pl in this distribution.
 To run this from the build directory, type "make teach".
 
-=head1 WARNING: MAJOR CHANGES since v0.15
-
-=over 4
-
-=item The separator character is now C<=>.
-
-=item The cryptographic scheme is now HMAC with SHA1.
-
-=item Only a prefix of the MAC is used.
-
-=back
-
-This API is still a release candidate and should remain relatively
-stable.
-
-=head1 EXTENDING Mail::SRS
-
-Write a subclass. If people mail me asking for callbacks with the
-hash data from the standard subclasses, I will provide them. Callback
-hooks have not been provided in this release candidate.
+=head1 METHODS
 
 =head2 $srs = new Mail::SRS(...)
 
@@ -139,8 +120,6 @@ sub new {
 	$self->{HashMin} = $self->{HashLength} unless $self->{HashMin};
 	return bless $self, $class;
 }
-
-=head1 METHODS
 
 =head2 $srsaddress = $srs->forward($sender, $alias)
 
@@ -414,6 +393,27 @@ The SRS0 tag.
 The SRS1 tag.
 
 =back
+
+=head1 EXTENDING Mail::SRS
+
+Write a subclass. If people mail me asking for callbacks with the
+hash data from the standard subclasses, I will provide them. Callback
+hooks have not been provided in this release candidate.
+
+=head1 WARNING: MAJOR CHANGES since v0.15
+
+=over 4
+
+=item The separator character is now C<=>.
+
+=item The cryptographic scheme is now HMAC with SHA1.
+
+=item Only a prefix of the MAC is used.
+
+=back
+
+This API is still a release candidate and should remain relatively
+stable.
 
 =head1 BUGS
 

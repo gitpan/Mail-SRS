@@ -35,19 +35,7 @@ DESCRIPTION
     the interactive walkthrough in eg/simple.pl in this distribution. To run
     this from the build directory, type "make teach".
 
-WARNING: MAJOR CHANGES since v0.15
-    The separator character is now "=".
-    The cryptographic scheme is now HMAC with SHA1.
-    Only a prefix of the MAC is used.
-
-    This API is still a release candidate and should remain relatively
-    stable.
-
-EXTENDING Mail::SRS
-    Write a subclass. If people mail me asking for callbacks with the hash
-    data from the standard subclasses, I will provide them. Callback hooks
-    have not been provided in this release candidate.
-
+METHODS
   $srs = new Mail::SRS(...)
     Construct a new Mail::SRS object and return it. Available parameters
     are:
@@ -79,7 +67,6 @@ EXTENDING Mail::SRS
     Some subclasses require other parameters. See their documentation for
     details.
 
-METHODS
   $srsaddress = $srs->forward($sender, $alias)
     Map a sender address into a new sender and a cryptographic cookie.
     Returns an SRS address to use as the new sender.
@@ -173,6 +160,19 @@ EXPORTS
 
     $SRSWRAP
         The SRS1 tag.
+
+EXTENDING Mail::SRS
+    Write a subclass. If people mail me asking for callbacks with the hash
+    data from the standard subclasses, I will provide them. Callback hooks
+    have not been provided in this release candidate.
+
+WARNING: MAJOR CHANGES since v0.15
+    The separator character is now "=".
+    The cryptographic scheme is now HMAC with SHA1.
+    Only a prefix of the MAC is used.
+
+    This API is still a release candidate and should remain relatively
+    stable.
 
 BUGS
     Email address parsing for quoted addresses is not yet done properly.

@@ -26,7 +26,7 @@ without store, and guards against gaming the shortcut system.
 
 =head1 SEE ALSO
 
-Mail::SRS
+L<Mail::SRS>
 
 =cut
 

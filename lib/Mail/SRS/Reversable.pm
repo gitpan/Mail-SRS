@@ -25,7 +25,7 @@ without store.
 
 =head1 SEE ALSO
 
-Mail::SRS
+L<Mail::SRS>
 
 =cut
 
