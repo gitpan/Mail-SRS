@@ -6,7 +6,9 @@ README
 README.pobox
 TODO
 eg/Limit.pm
-eg/simple.pl
+eg/exim/srs.conf
+eg/gentoo/srsd
+eg/teach.pl
 lib/Mail/SRS.pm
 lib/Mail/SRS/DB.pm
 lib/Mail/SRS/Daemon.pm

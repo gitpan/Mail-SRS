@@ -79,6 +79,12 @@ METHODS
         Some notes on the use and preservation of these separators are found
         in the perldoc for Mail::SRS::Guarded.
 
+    AlwaysRewrite => $boolean
+        SRS rewriting is not performed by default if the alias host matches
+        the sender host, since it would be unnecessary to do so, and it
+        interacts badly with ezmlm if we do. Set this to true if you want
+        always to rewrite when requested to do so.
+
     IgnoreTimestamp => $boolean
         Consider all timestamps to be valid. Defaults to false. It is
         STRONGLY recommended that this remain false. This parameter is
@@ -86,6 +92,16 @@ METHODS
         change in the timestamp format or encoding, until all timestamps in
         the old encoding would have become invalid. Note that timestamps
         still form a part of the cryptographic data when this is enabled.
+
+    AllowUnsafeSrs
+        This is a backwards compatibility option for an older version of the
+        protocol where SRS1 was not hash-protected. The 'reverse' method
+        will detect such addresses, and handle them properly. Deployments
+        upgrading from version <=0.27 to any version >=0.28 should enable
+        this for MaxAge+1 days.
+
+        When this option is enabled, all new addresses will be generated
+        with cryptographic protection.
 
     Some subclasses require other parameters. See their documentation for
     details.
@@ -312,6 +328,10 @@ NOTES ON SRS
     timestamp_check().
 
 CHANGELOG
+  MAJOR CHANGES since v0.27
+    The SRS1 address format has changed to include cryptographic
+    information.
+
   MINOR CHANGES since v0.26
     parse() and compile() are explicitly specified to die() on error.
 

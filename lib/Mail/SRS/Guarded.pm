@@ -58,14 +58,19 @@ sub compile {
 		# that this address is not opaque to us, even though we didn't
 		# actually process or generate it.
 
-		# my ($srshost, $srsuser) = split(qr/\Q$SRSSEP\E/, $senduser,2);
+		# hash, srshost, srsuser
+		my (undef, $srshost, $srsuser) =
+						split(qr/\Q$SRSSEP\E/, $senduser, 3);
+
+		my $hash = $self->hash_create($srshost, $srsuser);
+
 		return $SRS1TAG . $self->separator .
-						# join($SRSSEP, $srshost, $srsuser);
-						$senduser;
+						join($SRSSEP, $hash, $srshost, $srsuser);
 	}
 	elsif ($senduser =~ s/$SRS0RE/$1/io) {
+		my $hash = $self->hash_create($sendhost, $senduser);
 		return $SRS1TAG . $self->separator .
-						join($SRSSEP, $sendhost, $senduser);
+						join($SRSSEP, $hash, $sendhost, $senduser);
 	}
 
 	return $self->SUPER::compile($sendhost, $senduser);
@@ -75,9 +80,25 @@ sub parse {
 	my ($self, $user) = @_;
 
 	if ($user =~ s/$SRS1RE//oi) {
-		my ($srshost, $srsuser) = split(qr/\Q$SRSSEP\E/, $user, 2);
+		my ($hash, $srshost, $srsuser) =
+						split(qr/\Q$SRSSEP\E/, $user, 3);
+
+		if ($hash =~ /\Q.\E/) {
+			die "Hashless SRS1 address received when " .
+					"AllowUnsafeSrs is not set"
+							unless $self->{AllowUnsafeSrs};
+			# Reconstruct the parameters as they were in the old format.
+			$srsuser = $srshost . $SRSSEP . $srsuser;
+			$srshost = $hash;
+		}
+		else {
+			unless ($self->hash_verify($hash, $srshost, $srsuser)) {
+				die "Invalid hash";
+			}
+		}
+
 		unless (defined $srshost and defined $srsuser) {
-			die "Invalid wrapped SRS address";
+			die "Invalid SRS1 address";
 		}
 		return ($srshost, $SRS0TAG . $srsuser);
 	}

@@ -75,11 +75,15 @@ sub compile {
 	# Note that there are 4 fields here and that sendhost may
 	# not contain a + sign. Therefore, we do not need to escape
 	# + signs anywhere in order to reverse this transformation.
-	return $hash;
+	return $SRS0TAG . $self->separator . $hash;
 }
 
 sub parse {
 	my ($self, $user) = @_;
+
+	unless ($user =~ s/$SRS0RE//oi) {
+		die "Reverse address does not match $SRS0RE.";
+	}
 
 	my $hash = $user;
 	my $data;

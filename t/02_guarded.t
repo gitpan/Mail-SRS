@@ -2,9 +2,11 @@ use strict;
 use warnings;
 use blib;
 
-use Test::More tests => 25;
+use Test::More tests => 35;
 
 BEGIN { use_ok('Mail::SRS'); }
+
+BEGIN { import Mail::SRS qw(:all); }
 
 my $srs = new Mail::SRS(
 				Secret	=> "foo",
@@ -40,18 +42,40 @@ is($orig, $source, 'Got back the original sender');
 eval { $srs->reverse("garbage"); };
 ok(defined $@, 'Error detected reversing garbage');
 
+my $hack = $srs1;
+# Remove the hash from the address.
+$hack =~ s/$SRS1RE[^$SRSSEP]+$SRSSEP/$SRS1TAG$SRSSEP/;
+eval { $srs->reverse($hack); };
+like($@, qr/Hashless/, 'Trapped a hashless SRS1 address!');
+my $hsrs = new Mail::SRS(
+				Secret			=> "foo",
+				AllowUnsafeSrs	=> 1,
+					);
+my $hsrs0 = $hsrs->reverse($hack);
+is($hsrs0, $old1, 'Reversed a hashless SRS1 address');
+
 my @tests = qw(
 	user@domain-with-dash.com
 	user-with-dash@domain.com
 	user+with+plus@domain.com
 	user%with!everything&everything=@domain.somewhere
 		);
-my $alias = 'alias@host.com';
+
+my $asrs = new Mail::SRS(
+				Secret			=> "foo",
+				AlwaysRewrite	=> 1,
+					);
+
 foreach (@tests) {
-	my $srs0addr = $srs->forward($_, $alias);
+	my $srs0addr = $srs->forward($_, $alias[0]);
 	my $oldaddr = $srs->reverse($srs0addr);
 	is($oldaddr, $_, 'Idempotent on ' . $_);
-	my $srs1addr = $srs->forward($srs0addr, $alias);
+	my $srs1addr = $srs->forward($srs0addr, $alias[1]);
 	my $srs0rev = $srs->reverse($srs1addr);
 	is($srs0rev, $srs0addr, 'Idempotent on ' . $srs0addr);
+
+	my $idemaddr = $srs->forward($srs0addr, $alias[0]);
+	is($srs0addr, $idemaddr, 'Idempotent from same domain');
+	my $nonidemaddr = $asrs->forward($srs0addr, $alias[0]);
+	isnt($srs0addr, $nonidemaddr, 'AlwaysRewrite works from same domain');
 }

@@ -43,7 +43,7 @@ sub MY::postamble {
 .PHONY : teach aux readme
 
 teach : all
-	$(PERL) -Mblib eg/simple.pl
+	$(PERL) -Mblib eg/teach.pl
 
 aux : readme
 

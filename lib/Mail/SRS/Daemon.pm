@@ -117,13 +117,13 @@ sub run {
 						$sock->close();
 					}
 				}
-				else {
-					# print "Close on $sock\n";
-					$select->remove($sock);
-					$sock->flush();
-					$sock->close();
-					undef $sock;
-				}
+
+				# Exim requires that we unconditionally close the socket
+				# print "Close on $sock\n";
+				$select->remove($sock);
+				$sock->flush();
+				$sock->close();
+				undef $sock;
 			}
 		}
 		my @exc = $select->has_exception(0);

@@ -73,6 +73,7 @@ sub parse {
 	my ($self, $user) = @_;
 
 	unless ($user =~ s/$SRS0RE//oi) {
+		# We should deal with SRS1 addresses here, just in case?
 		die "Reverse address does not match $SRS0RE.";
 	}
 

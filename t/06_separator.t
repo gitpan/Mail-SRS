@@ -43,12 +43,11 @@ foreach (qw(- + =)) {
 		user=with=equals@domain.com
 		user%with!everything&everything=@domain.somewhere
 			);
-	my $alias = 'alias@host.com';
 	foreach (@tests) {
-		my $srs0addr = $srs->forward($_, $alias);
+		my $srs0addr = $srs->forward($_, $alias[0]);
 		my $oldaddr = $srs->reverse($srs0addr);
 		is($oldaddr, $_, 'Idempotent on ' . $_);
-		my $srs1addr = $srs->forward($srs0addr, $alias);
+		my $srs1addr = $srs->forward($srs0addr, $alias[1]);
 		my $srs0rev = $srs->reverse($srs1addr);
 		is($srs0rev, $srs0addr, 'Idempotent on ' . $srs0addr);
 	}

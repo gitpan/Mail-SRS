@@ -13,7 +13,7 @@ use Exporter;
 use Carp;
 use Digest::HMAC_SHA1;
 
-$VERSION = "0.27";
+$VERSION = "0.29";
 @ISA = qw(Exporter);
 
 $SRS0TAG = "SRS0";
@@ -132,6 +132,13 @@ in the default delivery rule for these users.
 Some notes on the use and preservation of these separators are found
 in the perldoc for L<Mail::SRS::Guarded>.
 
+=item AlwaysRewrite => $boolean
+
+SRS rewriting is not performed by default if the alias host matches
+the sender host, since it would be unnecessary to do so, and it
+interacts badly with ezmlm if we do. Set this to true if you want
+always to rewrite when requested to do so.
+
 =item IgnoreTimestamp => $boolean
 
 Consider all timestamps to be valid. Defaults to false. It is STRONGLY
@@ -140,6 +147,17 @@ timestamps may be ignored temporarily after a change in the timestamp
 format or encoding, until all timestamps in the old encoding would
 have become invalid. Note that timestamps still form a part of the
 cryptographic data when this is enabled.
+
+=item AllowUnsafeSrs
+
+This is a backwards compatibility option for an older version of the
+protocol where SRS1 was not hash-protected. The 'reverse' method
+will detect such addresses, and handle them properly. Deployments
+upgrading from version <=0.27 to any version >=0.28 should enable
+this for MaxAge+1 days.
+
+When this option is enabled, all new addresses will be generated with
+cryptographic protection.
 
 =back
 
@@ -195,6 +213,10 @@ sub forward {
 		$alias = $2;
 	}
 	my $aliashost = $alias;
+
+	if ($aliashost eq $sendhost) {
+		return "$senduser\@$sendhost" unless $self->{AlwaysRewrite};
+	}
 
 	# Subclasses may override the compile() method.
 	my $srsdata = $self->compile($sendhost, $senduser);
@@ -611,6 +633,15 @@ want to override hash_create(), hash_verify(), timestamp_create()
 or timestamp_check().
 
 =head1 CHANGELOG
+
+=head2 MAJOR CHANGES since v0.27
+
+=over 4
+
+=item The SRS1 address format has changed to include cryptographic
+information.
+
+=back
 
 =head2 MINOR CHANGES since v0.26
 
