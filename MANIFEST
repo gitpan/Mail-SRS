@@ -26,6 +26,7 @@ t/04_dbm.t
 t/05_shortcut.t
 t/06_separator.t
 t/07_varysep.t
+t/08_caseless.t
 t/10_pod.t
 t/11_pod_coverage.t
 t/20_cmdline.t

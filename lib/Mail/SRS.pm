@@ -13,7 +13,7 @@ use Exporter;
 use Carp;
 use Digest::HMAC_SHA1;
 
-$VERSION = "0.29";
+$VERSION = "0.30";
 @ISA = qw(Exporter);
 
 $SRS0TAG = "SRS0";
@@ -294,7 +294,9 @@ operation as a right shift by 5.
 # different expiry dates for different sources/targets, and we don't
 # have to store them.
 
-my @BASE64 = ('A'..'Z', 'a'..'z', '0'..'9', '+', '/');
+# Do NOT use BASE64 since the timestamp_check routine now explicit
+# smashes case in the timestamp just in case there was a problem.
+# my @BASE64 = ('A'..'Z', 'a'..'z', '0'..'9', '+', '/');
 my @BASE32 = ('A'..'Z', '2'..'7');
 
 my @BASE = @BASE32;
@@ -334,6 +336,7 @@ which is usually quite small: 1 in 132 by default.
 sub timestamp_check {
 	my ($self, $timestamp) = @_;
 	return 1 if $self->{IgnoreTimestamp};
+	$timestamp = uc $timestamp;			# LOOK OUT - USE BASE32
 	my $time = 0;
 	foreach (split(//, $timestamp)) {
 		$time = $time * scalar(@BASE) + $BASE{$_};
@@ -378,7 +381,7 @@ sub hash_create {
 					unless @secret;
 	my $hmac = new Digest::HMAC_SHA1($secret[0]);
 	foreach (@args) {
-		$hmac->add($_);
+		$hmac->add(lc $_);
 	}
 	my $hash = $hmac->b64digest;
 	return substr($hash, 0, $self->{HashLength});
@@ -403,7 +406,7 @@ sub hash_verify {
 	foreach my $secret (@secret) {
 		my $hmac = new Digest::HMAC_SHA1($secret);
 		foreach (@args) {
-			$hmac->add($_);
+			$hmac->add(lc $_);
 		}
 		my $valid = substr($hmac->b64digest, 0, length($hash));
 		# We test all case sensitive matches before case insensitive
@@ -634,12 +637,26 @@ or timestamp_check().
 
 =head1 CHANGELOG
 
+=head2 MINOR CHANGES since v0.29
+
+=over 4
+
+=item timestamp_check now explicitly smashes case when verifying. This
+means that the base used must be base32, NOT base64.
+
+=item hash_create and hash_verify now explicitly smash case when
+creating and verifying hashes. This does not have a significant
+cryptographic impact.
+
+=back
+
 =head2 MAJOR CHANGES since v0.27
 
 =over 4
 
 =item The SRS1 address format has changed to include cryptographic
-information.
+information. Existing deployments should consider setting
+AllowUnsafeSrs for MaxAge+1 days.
 
 =back
 

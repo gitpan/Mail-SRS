@@ -328,9 +328,16 @@ NOTES ON SRS
     timestamp_check().
 
 CHANGELOG
+  MINOR CHANGES since v0.29
+    timestamp_check now explicitly smashes case when verifying. This means
+    that the base used must be base32, NOT base64.
+    hash_create and hash_verify now explicitly smash case when creating and
+    verifying hashes. This does not have a significant cryptographic impact.
+
   MAJOR CHANGES since v0.27
     The SRS1 address format has changed to include cryptographic
-    information.
+    information. Existing deployments should consider setting AllowUnsafeSrs
+    for MaxAge+1 days.
 
   MINOR CHANGES since v0.26
     parse() and compile() are explicitly specified to die() on error.
