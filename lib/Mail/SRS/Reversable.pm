@@ -5,8 +5,9 @@ use warnings;
 use vars qw(@ISA);
 use Carp;
 use Mail::SRS qw(:all);
+use Mail::SRS::Shortcut;
 
-@ISA = qw(Mail::SRS);
+@ISA = qw(Mail::SRS::Shortcut);
 
 =head1 NAME
 
@@ -41,31 +42,8 @@ sub compile {
 	# Note that there are 4 fields here and that sendhost may
 	# not contain a + sign. Therefore, we do not need to escape
 	# + signs anywhere in order to reverse this transformation.
-	return join($SRSSEP,
-					$SRSTAG, $hash, $timestamp, $sendhost, $senduser);
-}
-
-sub parse {
-	my ($self, $user) = @_;
-
-	unless ($user =~ m/^\Q$SRSTAG$SRSSEP\E/oi) {
-		die "Reverse address does not start with $SRSTAG.";
-	}
-
-	# The 5 here matches the number of fields we encoded above. If
-	# there are more + signs, then they belong in senduser anyway.
-	my (undef, $hash, $timestamp, $sendhost, $senduser) =
-					split(qr/\Q$SRSSEP\E/, $user, 5);
-	# Again, this must match as above.
-	unless ($self->hash_verify($hash,$timestamp,$sendhost,$senduser)) {
-		die "Invalid hash";
-	}
-
-	unless ($self->timestamp_check($timestamp)) {
-		die "Invalid timestamp";
-	}
-
-	return ($sendhost, $senduser);
+	return $SRS0TAG . $self->separator .
+			join($SRSSEP, $hash, $timestamp, $sendhost, $senduser);
 }
 
 1;

@@ -40,7 +40,7 @@ METHODS
     Construct a new Mail::SRS object and return it. Available parameters
     are:
 
-    Secret
+    Secret => $string
         A key for the cryptographic algorithms. This may be an array or a
         single string. A string is promoted into an array of one element.
 
@@ -48,7 +48,7 @@ METHODS
         The maximum number of days for which a timestamp is considered
         valid. After this time, the timestamp is invalid.
 
-    HashLength
+    HashLength => $integer
         The number of bytes of base64 encoded data to use for the
         cryptographic hash. More is better, but makes for longer addresses
         which might exceed the 64 character length suggested by RFC2821.
@@ -56,7 +56,7 @@ METHODS
         information, which means that a spammer will have to make 2^24
         attempts to guarantee forging an SRS address.
 
-    HashMin
+    HashMin => $integer
         The shortest hash which we will allow to pass authentication. Since
         we allow any valid prefix of the full SHA1 HMAC to pass
         authentication, a spammer might just suggest a hash of length 0. We
@@ -64,6 +64,7 @@ METHODS
         Naturally, this must be no greater than HashLength and will default
         to HashLength unless otherwise specified.
 
+    Separator => $character
     Some subclasses require other parameters. See their documentation for
     details.
 
@@ -136,12 +137,19 @@ METHODS
   $srs->get_secret()
     Return the list of secrets. These are secret. Don't publish them.
 
+  $srs->separator()
+    Return the initial separator, which follows the SRS tag. This is only
+    used as the initial separator, for the convenience of administrators who
+    wish to make srs0 and srs1 users on their mail servers and require to
+    use + or - as the user delimiter. All other separators in the SRS
+    address must be "=".
+
 EXPORTS
-    Given :all, this module exports three variables.
+    Given :all, this module exports the following variables.
 
     $SRSSEP
-        The SRS separator. The choice of separator was fairly arbitrary. It
-        cannot be any of the following:
+        The SRS separator. The choice of "=" as internal separator was
+        fairly arbitrary. It cannot be any of the following:
 
         / + Used in Base64.
 
@@ -155,16 +163,27 @@ EXPORTS
             Shell or regular expression metacharacters are probably to be
             avoided.
 
-    $SRSTAG
+    $SRS0TAG
         The SRS0 tag.
 
-    $SRSWRAP
+    $SRS1TAG
         The SRS1 tag.
+
+    $SRSTAG
+        Deprecated, equal to $SRS0TAG.
+
+    $SRSWRAP
+        Deprecated, equal to $SRS1TAG.
 
 EXTENDING Mail::SRS
     Write a subclass. If people mail me asking for callbacks with the hash
     data from the standard subclasses, I will provide them. Callback hooks
     have not been provided in this release candidate.
+
+WARNING: MINOR CHANGES since v0.18
+    $SRSTAG and $SRSWRAP are deprecated.
+
+    You must use $SRS0RE and $SRS1RE to detect SRS addresses.
 
 WARNING: MAJOR CHANGES since v0.15
     The separator character is now "=".
@@ -176,6 +195,8 @@ WARNING: MAJOR CHANGES since v0.15
 
 BUGS
     Email address parsing for quoted addresses is not yet done properly.
+
+    More error checking should be done for invalid SRS addresses.
 
 SEE ALSO
     Mail::SRS::Guarded, Mail::SRS::DB, Mail::SRS::Reversable, "make teach",

@@ -17,5 +17,6 @@ t/02_guarded.t
 t/03_reversable.t
 t/04_dbm.t
 t/05_shortcut.t
+t/06_separator.t
 t/10_pod.t
 t/11_pod_coverage.t

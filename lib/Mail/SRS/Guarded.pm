@@ -33,24 +33,20 @@ L<Mail::SRS>
 sub compile {
 	my ($self, $sendhost, $senduser) = @_;
 
-	if ($senduser =~ m/^\Q$SRSWRAP$SRSSEP\E/io) {
+	if ($senduser =~ s/$SRS1RE//io) {
 		# We just do the split because this was hashed with someone else's
 		# secret key and we can't check it.
-		# SRSWRAP, host, srs0addr
-		my (undef, $srshost, $srsuser) =
-						split(qr/\Q$SRSSEP\E/, $senduser, 3);
-		# We should do this sanity check. After all, it might NOT be
-		# an SRS address, unlikely though that is. We are in the presence
-		# of malicious agents. We can check more rigorously than this...
-		if (defined $srshost and defined $srsuser) {
-			return join($SRSSEP,
-							$SRSWRAP, $srshost, $srsuser);
-		}
+		my ($srshost, $srsuser) = split(qr/\Q$SRSSEP\E/, $senduser, 2);
+		# We should do a sanity check. After all, it might NOT be
+		# an SRS address, unlikely though that is. We are in the
+		# presence of malicious agents.
+		return $SRS1TAG . $self->separator .
+						join($SRSSEP, $srshost, $srsuser);
 	}
-	elsif ($senduser =~ s/^\Q$SRSTAG$SRSSEP\E//io) {
+	elsif ($senduser =~ s/$SRS0RE//io) {
 		# Implementors please note, the last one was m//, this is s///
-		return join($SRSSEP,
-						$SRSWRAP, $sendhost, $senduser);
+		return $SRS1TAG . $self->separator .
+						join($SRSSEP, $sendhost, $senduser);
 	}
 
 	return $self->SUPER::compile($sendhost, $senduser);
@@ -59,13 +55,12 @@ sub compile {
 sub parse {
 	my ($self, $user) = @_;
 
-	if ($user =~ m/^\Q$SRSWRAP$SRSSEP\E/oi) {
-		my (undef, $srshost, $srsuser) =
-						split(qr/\Q$SRSSEP\E/, $user, 3);
+	if ($user =~ s/$SRS1RE//oi) {
+		my ($srshost, $srsuser) = split(qr/\Q$SRSSEP\E/, $user, 2);
 		unless (defined $srshost and defined $srsuser) {
 			die "Invalid wrapped SRS address";
 		}
-		return ($srshost, "$SRSTAG$SRSSEP$srsuser");
+		return ($srshost, $SRS0TAG . $self->separator . $srsuser);
 	}
 
 	return $self->SUPER::parse($user);

@@ -3,19 +3,30 @@ package Mail::SRS;
 use strict;
 use warnings;
 use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS
-				$SRSTAG $SRSWRAP $SRSSEP);
+				$SRS0TAG $SRS1TAG
+				$SRS0RE $SRS1RE
+				$SRSSEP
+				$SRSTAG $SRSWRAP);
 use Exporter;
 use Carp;
 use Digest::HMAC_SHA1;
 
-$VERSION = "0.18";
+$VERSION = "0.19";
 @ISA = qw(Exporter);
 
-$SRSTAG = "SRS0";
-$SRSWRAP = "SRS1";
+$SRS0TAG = "SRS0";
+$SRS1TAG = "SRS1";
+$SRS0RE = qr/^$SRS0TAG[-+=]/io;
+$SRS1RE = qr/^$SRS1TAG[-+=]/io;
 $SRSSEP = "=";
 
-@EXPORT_OK = qw($SRSTAG $SRSWRAP $SRSSEP);
+$SRSTAG = $SRS0TAG;
+$SRSWRAP = $SRS1TAG;
+
+@EXPORT_OK = qw($SRS0TAG $SRS1TAG
+				$SRS0RE $SRS1RE
+				$SRSSEP
+				$SRSTAG $SRSWRAP);
 %EXPORT_TAGS = (
 		all	=> \@EXPORT_OK,
 			);
@@ -69,7 +80,7 @@ are:
 
 =over 4
 
-=item Secret
+=item Secret => $string
 
 A key for the cryptographic algorithms. This may be an array or a single
 string. A string is promoted into an array of one element.
@@ -79,7 +90,7 @@ string. A string is promoted into an array of one element.
 The maximum number of days for which a timestamp is considered
 valid. After this time, the timestamp is invalid.
 
-=item HashLength
+=item HashLength => $integer
 
 The number of bytes of base64 encoded data to use for the cryptographic
 hash. More is better, but makes for longer addresses which might
@@ -88,7 +99,7 @@ exceed the 64 character length suggested by RFC2821. This defaults to
 means that a spammer will have to make 2^24 attempts to guarantee
 forging an SRS address.
 
-=item HashMin
+=item HashMin => $integer
 
 The shortest hash which we will allow to pass authentication. Since we
 allow any valid prefix of the full SHA1 HMAC to pass authentication,
@@ -96,6 +107,10 @@ a spammer might just suggest a hash of length 0. We require at least
 HashMin characters, which must all be correct. Naturally, this must
 be no greater than HashLength and will default to HashLength unless
 otherwise specified.
+
+=item Separator => $character
+
+
 
 =back
 
@@ -118,6 +133,10 @@ sub new {
 	$self->{MaxAge} = 31 unless $self->{MaxAge};
 	$self->{HashLength} = 4 unless $self->{HashLength};
 	$self->{HashMin} = $self->{HashLength} unless $self->{HashMin};
+	$self->{Separator} = '=' unless exists $self->{Separator};
+	unless ($self->{Separator} =~ m/^[-+=]$/) {
+		die "Initial separator must be = - or +";
+	}
 	return bless $self, $class;
 }
 
@@ -349,16 +368,30 @@ sub get_secret {
 	return @{$_[0]->{Secret}};
 }
 
+=head2 $srs->separator()
+
+Return the initial separator, which follows the SRS tag. This is only
+used as the initial separator, for the convenience of administrators
+who wish to make srs0 and srs1 users on their mail servers and require
+to use + or - as the user delimiter. All other separators in the SRS
+address must be C<=>.
+
+=cut
+
+sub separator {
+	return $_[0]->{Separator};
+}
+
 =head1 EXPORTS
 
-Given :all, this module exports three variables.
+Given :all, this module exports the following variables.
 
 =over 4
 
 =item $SRSSEP
 
-The SRS separator. The choice of separator was fairly arbitrary. It
-cannot be any of the following:
+The SRS separator. The choice of C<=> as internal separator was fairly
+arbitrary. It cannot be any of the following:
 
 =over 4
 
@@ -384,13 +417,21 @@ Shell or regular expression metacharacters are probably to be avoided.
 
 =back
 
-=item $SRSTAG
+=item $SRS0TAG
 
 The SRS0 tag.
 
-=item $SRSWRAP
+=item $SRS1TAG
 
 The SRS1 tag.
+
+=item $SRSTAG
+
+Deprecated, equal to $SRS0TAG.
+
+=item $SRSWRAP
+
+Deprecated, equal to $SRS1TAG.
 
 =back
 
@@ -399,6 +440,12 @@ The SRS1 tag.
 Write a subclass. If people mail me asking for callbacks with the
 hash data from the standard subclasses, I will provide them. Callback
 hooks have not been provided in this release candidate.
+
+=head1 WARNING: MINOR CHANGES since v0.18
+
+$SRSTAG and $SRSWRAP are deprecated.
+
+You must use $SRS0RE and $SRS1RE to detect SRS addresses.
 
 =head1 WARNING: MAJOR CHANGES since v0.15
 
@@ -418,6 +465,8 @@ stable.
 =head1 BUGS
 
 Email address parsing for quoted addresses is not yet done properly.
+
+More error checking should be done for invalid SRS addresses.
 
 =head1 SEE ALSO
 
