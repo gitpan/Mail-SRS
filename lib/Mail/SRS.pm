@@ -11,7 +11,7 @@ use Exporter;
 use Carp;
 use Digest::HMAC_SHA1;
 
-$VERSION = "0.19";
+$VERSION = "0.20";
 @ISA = qw(Exporter);
 
 $SRS0TAG = "SRS0";
@@ -110,7 +110,15 @@ otherwise specified.
 
 =item Separator => $character
 
+Specify the initial separator to use immediately after the SRS tag. SRS
+uses the = separator throughout EXCEPT for the initial separator,
+which may be any of + - or =.
 
+Some MTAs already have a feature by which text after a + or - is
+ignored for the purpose of identifying a local recipient. If the
+initial separator is set to + or -, then an administrator may process
+all SRS mails by creating users SRS0 and SRS1, and using Mail::SRS
+in the default delivery rule for these users.
 
 =back
 
@@ -443,7 +451,15 @@ hooks have not been provided in this release candidate.
 
 =head1 WARNING: MINOR CHANGES since v0.18
 
-$SRSTAG and $SRSWRAP are deprecated.
+=over 4
+
+=item $SRSTAG and $SRSWRAP are deprecated.
+
+=item Mail::SRS::Reversable is now Mail::SRS::Reversible
+
+This should not be a problem since people should not be using it!
+
+=back
 
 You must use $SRS0RE and $SRS1RE to detect SRS addresses.
 

@@ -10,11 +10,11 @@ eg/simple.pl
 lib/Mail/SRS.pm
 lib/Mail/SRS/DB.pm
 lib/Mail/SRS/Guarded.pm
-lib/Mail/SRS/Reversable.pm
+lib/Mail/SRS/Reversible.pm
 lib/Mail/SRS/Shortcut.pm
 t/01_basic.t
 t/02_guarded.t
-t/03_reversable.t
+t/03_reversible.t
 t/04_dbm.t
 t/05_shortcut.t
 t/06_separator.t

@@ -10,5 +10,5 @@ my $params = { trustme => [qr/^(?:new|parse|compile)$/] };
 pod_coverage_ok('Mail::SRS');
 pod_coverage_ok('Mail::SRS::Guarded', $params);
 pod_coverage_ok('Mail::SRS::DB', $params);
-pod_coverage_ok('Mail::SRS::Reversable', $params);
+pod_coverage_ok('Mail::SRS::Reversible', $params);
 pod_coverage_ok('Mail::SRS::Shortcut', $params);

@@ -4,13 +4,13 @@ use blib;
 
 use Test::More tests => 13;
 
-BEGIN { use_ok('Mail::SRS::Reversable'); }
-my $srs = new Mail::SRS::Reversable(
+BEGIN { use_ok('Mail::SRS::Reversible'); }
+my $srs = new Mail::SRS::Reversible(
 				Secret	=> "foo",
 					);
 ok(defined $srs, 'Created an object');
 isa_ok($srs, 'Mail::SRS');
-isa_ok($srs, 'Mail::SRS::Reversable');
+isa_ok($srs, 'Mail::SRS::Reversible');
 
 my @secret = $srs->get_secret;
 is($secret[0], 'foo', 'Can still call methods on new object');

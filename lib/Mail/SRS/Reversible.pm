@@ -1,4 +1,4 @@
-package Mail::SRS::Reversable;
+package Mail::SRS::Reversible;
 
 use strict;
 use warnings;
@@ -11,12 +11,12 @@ use Mail::SRS::Shortcut;
 
 =head1 NAME
 
-Mail::SRS::Reversable - A fully reversable Sender Rewriting Scheme
+Mail::SRS::Reversible - A fully reversible Sender Rewriting Scheme
 
 =head1 SYNOPSIS
 
-	use Mail::SRS::Reversable;
-	my $srs = new Mail::SRS::Reversable(...);
+	use Mail::SRS::Reversible;
+	my $srs = new Mail::SRS::Reversible(...);
 
 =head1 DESCRIPTION
 

@@ -65,6 +65,16 @@ METHODS
         to HashLength unless otherwise specified.
 
     Separator => $character
+        Specify the initial separator to use immediately after the SRS tag.
+        SRS uses the = separator throughout EXCEPT for the initial
+        separator, which may be any of + - or =.
+
+        Some MTAs already have a feature by which text after a + or - is
+        ignored for the purpose of identifying a local recipient. If the
+        initial separator is set to + or -, then an administrator may
+        process all SRS mails by creating users SRS0 and SRS1, and using
+        Mail::SRS in the default delivery rule for these users.
+
     Some subclasses require other parameters. See their documentation for
     details.
 
@@ -182,6 +192,8 @@ EXTENDING Mail::SRS
 
 WARNING: MINOR CHANGES since v0.18
     $SRSTAG and $SRSWRAP are deprecated.
+    Mail::SRS::Reversable is now Mail::SRS::Reversible
+        This should not be a problem since people should not be using it!
 
     You must use $SRS0RE and $SRS1RE to detect SRS addresses.
 
