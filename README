@@ -79,6 +79,14 @@ METHODS
         Some notes on the use and preservation of these separators are found
         in the perldoc for Mail::SRS::Guarded.
 
+    IgnoreTimestamp => $boolean
+        Consider all timestamps to be valid. Defaults to false. It is
+        STRONGLY recommended that this remain false. This parameter is
+        provided so that timestamps may be ignored temporarily after a
+        change in the timestamp format or encoding, until all timestamps in
+        the old encoding would have become invalid. Note that timestamps
+        still form a part of the cryptographic data when this is enabled.
+
     Some subclasses require other parameters. See their documentation for
     details.
 

@@ -11,7 +11,7 @@ use Exporter;
 use Carp;
 use Digest::HMAC_SHA1;
 
-$VERSION = "0.24";
+$VERSION = "0.25";
 @ISA = qw(Exporter);
 
 $SRS0TAG = "SRS0";
@@ -123,6 +123,15 @@ in the default delivery rule for these users.
 
 Some notes on the use and preservation of these separators are found
 in the perldoc for L<Mail::SRS::Guarded>.
+
+=item IgnoreTimestamp => $boolean
+
+Consider all timestamps to be valid. Defaults to false. It is STRONGLY
+recommended that this remain false. This parameter is provided so that
+timestamps may be ignored temporarily after a change in the timestamp
+format or encoding, until all timestamps in the old encoding would
+have become invalid. Note that timestamps still form a part of the
+cryptographic data when this is enabled.
 
 =back
 
@@ -297,6 +306,7 @@ which is usually quite small: 1 in 132 by default.
 
 sub timestamp_check {
 	my ($self, $timestamp) = @_;
+	return 1 if $self->{IgnoreTimestamp};
 	my $time = 0;
 	foreach (split(//, $timestamp)) {
 		$time = $time * scalar(@BASE) + $BASE{$_};
