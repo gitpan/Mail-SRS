@@ -140,15 +140,15 @@ EOM
 
 presskey;
 
-use Mail::SRS::Reversable;
-$srs = new Mail::SRS::Reversable(
+use Mail::SRS::Reversible;
+$srs = new Mail::SRS::Reversible(
 				Secret	=> "foo",
 					);
 my $revsource = $srs->forward($newsource, $final);
 
 print << "EOM";
 The second is the fully reversable transformation, and is provided by a
-subclass of Mail::SRS called Mail::SRS::Reversable. This subclass
+subclass of Mail::SRS called Mail::SRS::Reversible. This subclass
 rewrites
 	$newsource
 to

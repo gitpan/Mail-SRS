@@ -193,6 +193,11 @@ EXTENDING Mail::SRS
     data from the standard subclasses, I will provide them. Callback hooks
     have not been provided in this release candidate.
 
+WARNING: MINOR CHANGES since v0.21
+    Dates are now encoded in base32.
+    Case insensitive MAC validation is now allowed, but will issue a
+    warning.
+
 WARNING: MINOR CHANGES since v0.18
     $SRSTAG and $SRSWRAP are deprecated.
     Mail::SRS::Reversable is now Mail::SRS::Reversible
@@ -212,6 +217,8 @@ BUGS
     Email address parsing for quoted addresses is not yet done properly.
 
     More error checking should be done for invalid SRS addresses.
+
+    Case insensitive MAC validation should become an option.
 
 SEE ALSO
     Mail::SRS::Guarded, Mail::SRS::DB, Mail::SRS::Reversable, "make teach",

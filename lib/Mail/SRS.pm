@@ -11,7 +11,7 @@ use Exporter;
 use Carp;
 use Digest::HMAC_SHA1;
 
-$VERSION = "0.21";
+$VERSION = "0.22";
 @ISA = qw(Exporter);
 
 $SRS0TAG = "SRS0";
@@ -251,8 +251,15 @@ given. $time is a Unix timestamp (seconds since the aeon).
 # have to store them.
 
 my @BASE64 = ('A'..'Z', 'a'..'z', '0'..'9', '+', '/');
-my %BASE64 = map { $BASE64[$_] => $_ } (0..63);
-my $TICKSLOTS = scalar(@BASE64) * scalar(@BASE64);	# Two chars
+my @BASE32 = ('0'..'9', 'A'..'V');
+
+my @BASE = @BASE32;
+my %BASE = map { $BASE[$_] => $_ } (0..$#BASE);
+# This checks for more than one bit set in the size.
+# i.e. is the size a power of 2?
+die "Invalid base array of size " . scalar(@BASE)
+				if scalar(@BASE) & (scalar(@BASE) - 1);
+my $TICKSLOTS = scalar(@BASE) * scalar(@BASE);	# Two chars
 my $PRECISION = 60 * 60 * 24;	# One day
 
 sub timestamp_create {
@@ -262,9 +269,9 @@ sub timestamp_create {
 	# % $TICKSLOTS isn't needed.
 	$time = int($time / $PRECISION) % $TICKSLOTS;
 	# print "Time is $time\n";
-	my $out = $BASE64[$time & 63];
-	$time = int($time / 64);
-	return $BASE64[$time & 63] . $out;
+	my $out = $BASE[$time & $#BASE];	# $#BASE is 2^n -1
+	$time = int($time / scalar(@BASE));	# Use right shift.
+	return $BASE[$time & $#BASE] . $out;
 }
 
 =head2 $srs->timestamp_check($timestamp)
@@ -284,7 +291,7 @@ sub timestamp_check {
 	my ($self, $timestamp) = @_;
 	my $time = 0;
 	foreach (split(//, $timestamp)) {
-		$time = $time * 64 + $BASE64{$_};
+		$time = $time * scalar(@BASE) + $BASE{$_};
 	}
 	my $now = int(time() / $PRECISION) % $TICKSLOTS;
 	# print "Time is $time, Now is $now\n";
@@ -347,12 +354,20 @@ sub hash_verify {
 	my @secret = $self->get_secret;
 	croak "Cannot verify a cryptographic MAC without a secret"
 					unless @secret;
+	my %valid = ();
 	foreach my $secret (@secret) {
 		my $hmac = new Digest::HMAC_SHA1($secret);
 		foreach (@args) {
 			$hmac->add($_);
 		}
-		return 1 if substr($hmac->b64digest, 0, length($hash)) eq $hash;
+		my $valid = substr($hmac->b64digest, 0, length($hash));
+		return 1 if $valid eq $hash;
+		$valid{lc($valid)} = 1;
+	}
+	if ($valid{lc($hash)}) {
+		warn "SRS: Case insensitive hash match detected. " .
+			"Someone smashed case in the local-part.";
+		return 1;
 	}
 	return undef;
 }
@@ -452,6 +467,17 @@ Write a subclass. If people mail me asking for callbacks with the
 hash data from the standard subclasses, I will provide them. Callback
 hooks have not been provided in this release candidate.
 
+=head1 WARNING: MINOR CHANGES since v0.21
+
+=over 4
+
+=item Dates are now encoded in base32.
+
+=item Case insensitive MAC validation is now allowed, but will issue
+a warning.
+
+=back
+
 =head1 WARNING: MINOR CHANGES since v0.18
 
 =over 4
@@ -486,6 +512,8 @@ stable.
 Email address parsing for quoted addresses is not yet done properly.
 
 More error checking should be done for invalid SRS addresses.
+
+Case insensitive MAC validation should become an option.
 
 =head1 SEE ALSO
 
