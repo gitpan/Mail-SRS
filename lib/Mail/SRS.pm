@@ -8,7 +8,7 @@ use Exporter;
 use Carp;
 use Digest::HMAC_MD5;
 
-$VERSION = "0.14";
+$VERSION = "0.15";
 @ISA = qw(Exporter);
 
 $SRSTAG = "SRS0";
@@ -294,14 +294,14 @@ sub timestamp_create {
 
 =item $srs->timestamp_check($timestamp)
 
-Return 1 if a timestamp is valid, undef otherwise. There are 65536
+Return 1 if a timestamp is valid, undef otherwise. There are 4096
 possible timestamps, used in a cycle. At any time, $srs->{MaxAge}
 timestamps in this cycle are valid, the last one being today. A
 timestamp from the future is not valid, neither is a timestamp from
 too far into the past. Of course if you go far enough into the future,
 the cycle wraps around, and there are valid timestamps again, but the
-likelihood of a random timestamp being valid is 65536/$srs->{MaxAge},
-which is usually quite small: 1 in 2114 by default.
+likelihood of a random timestamp being valid is 4096/$srs->{MaxAge},
+which is usually quite small: 1 in 132 by default.
 
 =cut
 
@@ -421,7 +421,8 @@ Email address parsing for quoted addresses is not yet done properly.
 
 =head1 SEE ALSO
 
-Mail::SRS::DB, Mail::SRS::Reversable, "make teach", eg/*
+Mail::SRS::Guarded, Mail::SRS::DB, Mail::SRS::Reversable,
+"make teach", eg/*
 
 =head1 AUTHOR
 

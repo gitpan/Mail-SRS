@@ -89,6 +89,7 @@ EOM
 
 presskey;
 
+my $srs1source1 = $srs->forward($srs1source, $final);
 my $srs0source = $srs->reverse($srs1source);
 my $reverse = $srs->reverse($srs0source);
 
@@ -100,6 +101,10 @@ transformation, it will get the original SRS address for bounces:
 And then the first forwarder in the chain may perform a final reversal,
 checking the cryptographic information before returning the mail to
 	$reverse
+
+If the mail was to be forwarded a third time, hops can be dropped on the
+return path, and the new SRS1 address would be
+	$srs1source1
 
 For more information on the peculiarities of this `second layer', see
 the web page at http://www.anarres.org/projects/srs/

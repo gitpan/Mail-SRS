@@ -101,14 +101,14 @@ METHODS
     given. $time is a Unix timestamp (seconds since the aeon).
 
     $srs->timestamp_check($timestamp)
-    Return 1 if a timestamp is valid, undef otherwise. There are 65536
+    Return 1 if a timestamp is valid, undef otherwise. There are 4096
     possible timestamps, used in a cycle. At any time, $srs->{MaxAge}
     timestamps in this cycle are valid, the last one being today. A
     timestamp from the future is not valid, neither is a timestamp from too
     far into the past. Of course if you go far enough into the future, the
     cycle wraps around, and there are valid timestamps again, but the
-    likelihood of a random timestamp being valid is 65536/$srs->{MaxAge},
-    which is usually quite small: 1 in 2114 by default.
+    likelihood of a random timestamp being valid is 4096/$srs->{MaxAge},
+    which is usually quite small: 1 in 132 by default.
 
     $srs->time_check($time)
     Similar to $srs->timestamp_check($timestamp), but takes a Unix time, and
@@ -146,7 +146,8 @@ BUGS
     Email address parsing for quoted addresses is not yet done properly.
 
 SEE ALSO
-    Mail::SRS::DB, Mail::SRS::Reversable, "make teach", eg/*
+    Mail::SRS::Guarded, Mail::SRS::DB, Mail::SRS::Reversable, "make teach",
+    eg/*
 
 AUTHOR
             Shevek
