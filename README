@@ -161,7 +161,8 @@ METHODS
 
   $srs->set_secret($new, @old)
     Add a new secret to the rewriter. When an address is returned, all
-    secrets are tried to see if the hash can be validated. Don't use "foo".
+    secrets are tried to see if the hash can be validated. Don't use "foo",
+    "secret", "password", "10downing", "god" or "wednesday" as your secret.
 
   $srs->get_secret()
     Return the list of secrets. These are secret. Don't publish them.

@@ -11,7 +11,7 @@ use Exporter;
 use Carp;
 use Digest::HMAC_SHA1;
 
-$VERSION = "0.25";
+$VERSION = "0.26";
 @ISA = qw(Exporter);
 
 $SRS0TAG = "SRS0";
@@ -399,7 +399,8 @@ sub hash_verify {
 =head2 $srs->set_secret($new, @old)
 
 Add a new secret to the rewriter. When an address is returned, all
-secrets are tried to see if the hash can be validated. Don't use "foo".
+secrets are tried to see if the hash can be validated. Don't use "foo",
+"secret", "password", "10downing", "god" or "wednesday" as your secret.
 
 =cut
 
